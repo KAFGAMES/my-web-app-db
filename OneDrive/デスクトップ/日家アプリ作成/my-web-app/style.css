@@ -1,0 +1,60 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.calendar {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    padding: 16px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-table th, .calendar-table td {
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.calendar-table th {
+    background-color: #f4f4f4;
+}
+
+.calendar-table td:hover {
+    background-color: #f0f8ff;
+    cursor: pointer;
+}
+
+.calendar-table .today {
+    background-color: #ffeb3b;
+}
+
+.profit {
+    font-size: 12px;
+    margin-top: 5px;
+    color: green; /* 利益の数字を緑に */
+}
+
+.expense {
+    font-size: 12px;
+    margin-top: 5px;
+    color: red; /* 支出の数字を赤に */
+}
