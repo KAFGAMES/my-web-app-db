@@ -25,6 +25,7 @@ function saveData() {
     localStorage.setItem('calendarData', JSON.stringify(data));
 }
 
+// 月間損益を計算する関数
 function calculateMonthlyBalance(year, month) {
     let totalProfit = 0;
     let totalExpense = 0;
@@ -48,6 +49,7 @@ function calculateMonthlyBalance(year, month) {
     }
 }
 
+// カレンダーをレンダリングする関数
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -69,6 +71,7 @@ function renderCalendar(date) {
         const cell = document.createElement('td');
         const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+        // 日付をクリックした際のイベントリスナー
         cell.addEventListener('click', () => {
             selectedDate = cellDate;
             profitInput.value = data[cellDate]?.profit || 0;
@@ -80,6 +83,7 @@ function renderCalendar(date) {
         dateDiv.textContent = day;
         cell.appendChild(dateDiv);
 
+        // 利益と支出の表示スペースを作成
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
         profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit}` : "利益: 0";
@@ -98,6 +102,7 @@ function renderCalendar(date) {
             dateDiv.appendChild(memoIndicator);
         }
 
+        // 今日の日付を強調表示
         const today = new Date();
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
             cell.classList.add('today');
@@ -105,6 +110,7 @@ function renderCalendar(date) {
 
         row.appendChild(cell);
 
+        // 1週間ごとに新しい行を追加
         if ((firstDay + day) % 7 === 0) {
             calendarBody.appendChild(row);
             row = document.createElement('tr');
@@ -141,14 +147,17 @@ memoSaveButton.addEventListener('click', () => {
     }
 });
 
+// 前月ボタンのイベントリスナー
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar(currentDate);
 });
 
+// 次月ボタンのイベントリスナー
 nextMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar(currentDate);
 });
 
+// 初回のカレンダー描画
 renderCalendar(currentDate);
