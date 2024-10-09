@@ -8,17 +8,22 @@ const saveButton = document.getElementById('save-btn');
 const memoInput = document.getElementById('memo-input');
 const memoSaveButton = document.getElementById('memo-save-btn');
 const monthlyBalanceDiv = document.getElementById('monthly-balance');
+const goalInput = document.getElementById('goal-input');
+const goalSaveButton = document.getElementById('goal-save-btn');
+const goalChartCanvas = document.getElementById('goal-chart');
 
 let currentDate = new Date();
 let selectedDate = null;
+let goalChart = null;
 
 // データの初期化
 let data = JSON.parse(localStorage.getItem('calendarData')) || {
     "2024-10-01": { profit: 7000, expense: 3172, memo: "サンプルメモ" },
     "2024-10-02": { profit: 2263, expense: 0, memo: "" },
     "2024-10-09": { profit: 1255, expense: 0, memo: "" },
-    // 他の日付もここに追加可能
 };
+
+let monthlyGoals = JSON.parse(localStorage.getItem('monthlyGoals')) || {};
 
 // カレンダーのデータをローカルストレージに保存する関数
 function saveData() {
@@ -41,12 +46,46 @@ function calculateMonthlyBalance(year, month) {
     const balance = totalProfit - totalExpense;
     monthlyBalanceDiv.textContent = `月間損益: ${balance}`;
 
-    // 損益の色を変更
     if (balance >= 0) {
         monthlyBalanceDiv.style.color = 'green';
     } else {
         monthlyBalanceDiv.style.color = 'red';
     }
+
+    updateGoalChart(balance, year, month);
+}
+
+// 円グラフを更新する関数
+function updateGoalChart(balance, year, month) {
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const goal = monthlyGoals[monthKey] || 0;
+
+    const percentage = goal > 0 ? (balance / goal) * 100 : 0;
+    const chartData = {
+        labels: ['達成率', '未達成率'],
+        datasets: [{
+            data: [percentage, 100 - percentage],
+            backgroundColor: ['green', 'lightgrey']
+        }]
+    };
+
+    if (goalChart) {
+        goalChart.destroy();
+    }
+
+    goalChart = new Chart(goalChartCanvas, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                }
+            }
+        }
+    });
 }
 
 // カレンダーをレンダリングする関数
@@ -55,8 +94,6 @@ function renderCalendar(date) {
     const month = date.getMonth();
 
     calendarBody.innerHTML = '';
-
-    // 月と年を更新
     monthYear.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
 
     const firstDay = new Date(year, month, 1).getDay();
@@ -71,7 +108,6 @@ function renderCalendar(date) {
         const cell = document.createElement('td');
         const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-        // 日付をクリックした際のイベントリスナー
         cell.addEventListener('click', () => {
             selectedDate = cellDate;
             profitInput.value = data[cellDate]?.profit || 0;
@@ -83,7 +119,6 @@ function renderCalendar(date) {
         dateDiv.textContent = day;
         cell.appendChild(dateDiv);
 
-        // 利益と支出の表示スペースを作成
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
         profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit}` : "利益: 0";
@@ -94,7 +129,6 @@ function renderCalendar(date) {
         expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense}` : "支出: 0";
         cell.appendChild(expenseDiv);
 
-        // メモがある場合、「●」を表示
         if (data[cellDate]?.memo && data[cellDate].memo.trim() !== "") {
             const memoIndicator = document.createElement('span');
             memoIndicator.textContent = " ●";
@@ -102,7 +136,6 @@ function renderCalendar(date) {
             dateDiv.appendChild(memoIndicator);
         }
 
-        // 今日の日付を強調表示
         const today = new Date();
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
             cell.classList.add('today');
@@ -110,7 +143,6 @@ function renderCalendar(date) {
 
         row.appendChild(cell);
 
-        // 1週間ごとに新しい行を追加
         if ((firstDay + day) % 7 === 0) {
             calendarBody.appendChild(row);
             row = document.createElement('tr');
@@ -121,11 +153,19 @@ function renderCalendar(date) {
         calendarBody.appendChild(row);
     }
 
-    // 月間損益を計算して表示
     calculateMonthlyBalance(year, month);
 }
 
-// 保存ボタンのイベントリスナー
+// 目標金額の保存
+goalSaveButton.addEventListener('click', () => {
+    const goal = parseInt(goalInput.value, 10) || 0;
+    const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    monthlyGoals[monthKey] = goal;
+    localStorage.setItem('monthlyGoals', JSON.stringify(monthlyGoals));
+    calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
+});
+
+// 利益・支出やメモの保存
 saveButton.addEventListener('click', () => {
     if (selectedDate) {
         data[selectedDate] = {
@@ -133,31 +173,27 @@ saveButton.addEventListener('click', () => {
             expense: parseInt(expenseInput.value, 10) || 0,
             memo: data[selectedDate]?.memo || ""
         };
-        saveData(); // データをローカルストレージに保存
+        saveData();
         renderCalendar(currentDate);
     }
 });
 
-// メモ保存ボタンのイベントリスナー
 memoSaveButton.addEventListener('click', () => {
     if (selectedDate) {
         data[selectedDate].memo = memoInput.value;
-        saveData(); // データをローカルストレージに保存
-        renderCalendar(currentDate); // カレンダーを再描画して「●」を反映
+        saveData();
+        renderCalendar(currentDate);
     }
 });
 
-// 前月ボタンのイベントリスナー
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar(currentDate);
 });
 
-// 次月ボタンのイベントリスナー
 nextMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar(currentDate);
 });
 
-// 初回のカレンダー描画
 renderCalendar(currentDate);

@@ -17,7 +17,7 @@ body {
     max-width: 1200px;
 }
 
-.input-panel {
+.input-panel, .goal-panel {
     border: 1px solid #333;
     border-radius: 8px;
     background-color: #fff;
