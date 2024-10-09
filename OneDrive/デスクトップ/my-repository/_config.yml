@@ -20,3 +20,5 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+source: docs
+destination: docs/_site
