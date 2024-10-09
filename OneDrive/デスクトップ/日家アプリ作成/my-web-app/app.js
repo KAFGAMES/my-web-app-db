@@ -11,13 +11,18 @@ const memoSaveButton = document.getElementById('memo-save-btn');
 let currentDate = new Date();
 let selectedDate = null;
 
-// サンプルデータ（利益と支出、メモを保持）
-const data = {
+// データの初期化
+let data = JSON.parse(localStorage.getItem('calendarData')) || {
     "2024-10-01": { profit: 7000, expense: 3172, memo: "サンプルメモ" },
     "2024-10-02": { profit: 2263, expense: 0, memo: "" },
     "2024-10-09": { profit: 1255, expense: 0, memo: "" },
     // 他の日付もここに追加可能
 };
+
+// カレンダーのデータをローカルストレージに保存する関数
+function saveData() {
+    localStorage.setItem('calendarData', JSON.stringify(data));
+}
 
 function renderCalendar(date) {
     const year = date.getFullYear();
@@ -51,6 +56,7 @@ function renderCalendar(date) {
         dateDiv.textContent = day;
         cell.appendChild(dateDiv);
 
+        // 利益と支出の表示スペースを作成
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
         profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit}` : "利益: 0";
@@ -60,6 +66,14 @@ function renderCalendar(date) {
         expenseDiv.classList.add('expense');
         expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense}` : "支出: 0";
         cell.appendChild(expenseDiv);
+
+        // メモがある場合、「●」を表示
+        if (data[cellDate]?.memo && data[cellDate].memo.trim() !== "") {
+            const memoIndicator = document.createElement('span');
+            memoIndicator.textContent = " ●";
+            memoIndicator.style.color = "blue";
+            dateDiv.appendChild(memoIndicator);
+        }
 
         const today = new Date();
         if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
@@ -87,6 +101,7 @@ saveButton.addEventListener('click', () => {
             expense: parseInt(expenseInput.value, 10) || 0,
             memo: data[selectedDate]?.memo || ""
         };
+        saveData(); // データをローカルストレージに保存
         renderCalendar(currentDate);
     }
 });
@@ -95,6 +110,8 @@ saveButton.addEventListener('click', () => {
 memoSaveButton.addEventListener('click', () => {
     if (selectedDate) {
         data[selectedDate].memo = memoInput.value;
+        saveData(); // データをローカルストレージに保存
+        renderCalendar(currentDate); // カレンダーを再描画して「●」を反映
     }
 });
 
