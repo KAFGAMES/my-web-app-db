@@ -78,3 +78,9 @@ body {
     margin-top: 5px;
     color: red;
 }
+
+.monthly-balance {
+    font-size: 16px;
+    margin: 10px 0;
+    text-align: center;
+}

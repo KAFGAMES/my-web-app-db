@@ -7,6 +7,7 @@ const expenseInput = document.getElementById('expense-input');
 const saveButton = document.getElementById('save-btn');
 const memoInput = document.getElementById('memo-input');
 const memoSaveButton = document.getElementById('memo-save-btn');
+const monthlyBalanceDiv = document.getElementById('monthly-balance');
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -22,6 +23,29 @@ let data = JSON.parse(localStorage.getItem('calendarData')) || {
 // カレンダーのデータをローカルストレージに保存する関数
 function saveData() {
     localStorage.setItem('calendarData', JSON.stringify(data));
+}
+
+function calculateMonthlyBalance(year, month) {
+    let totalProfit = 0;
+    let totalExpense = 0;
+
+    for (const [key, value] of Object.entries(data)) {
+        const date = new Date(key);
+        if (date.getFullYear() === year && date.getMonth() === month) {
+            totalProfit += value.profit || 0;
+            totalExpense += value.expense || 0;
+        }
+    }
+
+    const balance = totalProfit - totalExpense;
+    monthlyBalanceDiv.textContent = `月間損益: ${balance}`;
+
+    // 損益の色を変更
+    if (balance >= 0) {
+        monthlyBalanceDiv.style.color = 'green';
+    } else {
+        monthlyBalanceDiv.style.color = 'red';
+    }
 }
 
 function renderCalendar(date) {
@@ -56,7 +80,6 @@ function renderCalendar(date) {
         dateDiv.textContent = day;
         cell.appendChild(dateDiv);
 
-        // 利益と支出の表示スペースを作成
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
         profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit}` : "利益: 0";
@@ -91,6 +114,9 @@ function renderCalendar(date) {
     if (row.children.length > 0) {
         calendarBody.appendChild(row);
     }
+
+    // 月間損益を計算して表示
+    calculateMonthlyBalance(year, month);
 }
 
 // 保存ボタンのイベントリスナー
