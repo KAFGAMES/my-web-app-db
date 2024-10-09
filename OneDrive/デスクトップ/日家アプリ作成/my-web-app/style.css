@@ -8,6 +8,26 @@ body {
     background-color: #f0f0f0;
 }
 
+.container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+.input-panel, .memo-panel {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .calendar {
     border: 1px solid #333;
     border-radius: 8px;
@@ -50,11 +70,11 @@ body {
 .profit {
     font-size: 12px;
     margin-top: 5px;
-    color: green; /* 利益の数字を緑に */
+    color: green;
 }
 
 .expense {
     font-size: 12px;
     margin-top: 5px;
-    color: red; /* 支出の数字を赤に */
+    color: red;
 }
