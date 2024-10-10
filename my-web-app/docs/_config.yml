@@ -24,3 +24,6 @@ source: docs
 destination: docs/_site
 
 theme: minima
+
+encoding: utf-8
+

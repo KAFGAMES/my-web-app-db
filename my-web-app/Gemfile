@@ -11,3 +11,6 @@ gem "jekyll-paginate" # ページネーション用のプラグイン
 gem "jekyll-sitemap" # サイトマップ生成用のプラグイン
 
 # 他にも必要なプラグインがあればここに追加
+
+gem 'fiddle'
+
