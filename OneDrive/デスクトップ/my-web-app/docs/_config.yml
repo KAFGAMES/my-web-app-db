@@ -22,3 +22,5 @@ exclude:
   - vendor/ruby/
 source: docs
 destination: docs/_site
+
+theme: minima
