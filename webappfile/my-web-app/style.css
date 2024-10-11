@@ -1,0 +1,98 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.input-panel, .goal-panel {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calendar {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    padding: 16px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-table th, .calendar-table td {
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.calendar-table th {
+    background-color: #f4f4f4;
+}
+
+.calendar-table td:hover {
+    background-color: #f0f8ff;
+    cursor: pointer;
+}
+
+.calendar-table .today {
+    background-color: #ffeb3b;
+}
+
+.profit {
+    font-size: 12px;
+    margin-top: 5px;
+    color: green;
+}
+
+.expense {
+    font-size: 12px;
+    margin-top: 5px;
+    color: red;
+}
+
+.memo-panel {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 16px;
+}
+
+.memo-panel textarea {
+    width: 100%;
+    height: 200px;
+    resize: none;
+}
