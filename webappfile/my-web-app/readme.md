@@ -28,3 +28,9 @@ git add my-web-app/
 
 git commit -m "Clear cache and add files properly"
 git push
+
+
+mv index.html .
+git add index.html
+git commit -m "Move index.html to root"
+git push origin main
