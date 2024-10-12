@@ -92,6 +92,10 @@ function updateGoalChart(balance, year, month) {
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
+    
+    // 現在の日付を取得
+    const today = new Date();
+    const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     calendarBody.innerHTML = '';
     monthYear.textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
@@ -113,9 +117,9 @@ function renderCalendar(date) {
             profitInput.value = data[cellDate]?.profit || 0;
             expenseInput.value = data[cellDate]?.expense || 0;
             memoInput.value = data[cellDate]?.memo || "";
-            
+
             const selectedDateText = new Date(cellDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-    document.getElementById('memo-date').textContent = selectedDateText;
+            document.getElementById('memo-date').textContent = selectedDateText;
         });
 
         const dateDiv = document.createElement('div');
@@ -124,12 +128,12 @@ function renderCalendar(date) {
 
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
-        profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit}` : "利益: 0";
+        profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit.toLocaleString()}` : "利益: 0";
         cell.appendChild(profitDiv);
 
         const expenseDiv = document.createElement('div');
         expenseDiv.classList.add('expense');
-        expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense}` : "支出: 0";
+        expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense.toLocaleString()}` : "支出: 0";
         cell.appendChild(expenseDiv);
 
         if (data[cellDate]?.memo && data[cellDate].memo.trim() !== "") {
@@ -139,9 +143,17 @@ function renderCalendar(date) {
             dateDiv.appendChild(memoIndicator);
         }
 
-        const today = new Date();
-        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        // 今日の日付を強調表示
+        if (cellDate === todayDateString) {
             cell.classList.add('today');
+            // 初期選択された状態にする
+            selectedDate = cellDate;
+            profitInput.value = data[cellDate]?.profit || 0;
+            expenseInput.value = data[cellDate]?.expense || 0;
+            memoInput.value = data[cellDate]?.memo || "";
+
+            const selectedDateText = new Date(cellDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('memo-date').textContent = selectedDateText;
         }
 
         row.appendChild(cell);
@@ -158,6 +170,7 @@ function renderCalendar(date) {
 
     calculateMonthlyBalance(year, month);
 }
+
 
 // 目標金額の保存
 goalSaveButton.addEventListener('click', () => {
