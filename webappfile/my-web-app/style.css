@@ -111,5 +111,10 @@ body {
     resize: none;
 }
 
+.memo-exists {
+    background-color: #ffffcc;  /* 薄い黄色 */
+}
 
-
+.today {
+    background-color: #ffcc99;  /* オレンジ色 */
+}

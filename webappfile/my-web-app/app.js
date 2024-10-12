@@ -30,6 +30,21 @@ function saveData() {
     localStorage.setItem('calendarData', JSON.stringify(data));
 }
 
+// 今日の日付を選択状態にする関数
+function selectToday() {
+    const today = new Date();
+    const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // 今日の日付を選択
+    selectedDate = todayDateString;
+    profitInput.value = data[todayDateString]?.profit || 0;
+    expenseInput.value = data[todayDateString]?.expense || 0;
+    memoInput.value = data[todayDateString]?.memo || "";
+
+    const selectedDateText = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('memo-date').textContent = selectedDateText;
+}
+
 // 月間損益を計算する関数
 function calculateMonthlyBalance(year, month) {
     let totalProfit = 0;
@@ -88,12 +103,12 @@ function updateGoalChart(balance, year, month) {
     });
 }
 
-// カレンダーをレンダリングする関数
+// カレンダーを描画する関数
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
-    
-    // 現在の日付を取得
+
+    // 今日の日付を取得
     const today = new Date();
     const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -111,6 +126,9 @@ function renderCalendar(date) {
     for (let day = 1; day <= daysInMonth; day++) {
         const cell = document.createElement('td');
         const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        // メモがあるか確認
+        const memoExists = data[cellDate]?.memo && data[cellDate].memo.trim() !== "";
 
         cell.addEventListener('click', () => {
             selectedDate = cellDate;
@@ -136,24 +154,15 @@ function renderCalendar(date) {
         expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense.toLocaleString()}` : "支出: 0";
         cell.appendChild(expenseDiv);
 
-        if (data[cellDate]?.memo && data[cellDate].memo.trim() !== "") {
-            const memoIndicator = document.createElement('span');
-            memoIndicator.textContent = " ●";
-            memoIndicator.style.color = "blue";
-            dateDiv.appendChild(memoIndicator);
-        }
-
-        // 今日の日付を強調表示
+        // 今日の日付を強調表示し、初期選択する
         if (cellDate === todayDateString) {
             cell.classList.add('today');
-            // 初期選択された状態にする
-            selectedDate = cellDate;
-            profitInput.value = data[cellDate]?.profit || 0;
-            expenseInput.value = data[cellDate]?.expense || 0;
-            memoInput.value = data[cellDate]?.memo || "";
+        }
 
-            const selectedDateText = new Date(cellDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('memo-date').textContent = selectedDateText;
+        // メモが存在する場合にクラスを追加して背景色を変更
+        // ただし、今日の日付はオレンジ色のまま
+        if (memoExists && cellDate !== todayDateString) {
+            cell.classList.add('memo-exists');
         }
 
         row.appendChild(cell);
@@ -171,9 +180,12 @@ function renderCalendar(date) {
     calculateMonthlyBalance(year, month);
 }
 
-// ページが完全に読み込まれたらカレンダーを表示する
+
+
+// ページが読み込まれたら今日の日付を選択する
 document.addEventListener('DOMContentLoaded', function () {
-    renderCalendar(currentDate);  // ページ読み込み時にカレンダーを表示
+    renderCalendar(currentDate);  // カレンダーを現在の月で表示
+    selectToday();  // 今日の日付を選択
 });
 
 
@@ -199,13 +211,28 @@ saveButton.addEventListener('click', () => {
     }
 });
 
+// メモ保存のイベントリスナーを修正
 memoSaveButton.addEventListener('click', () => {
     if (selectedDate) {
+        // メモをデータに保存
+        data[selectedDate] = data[selectedDate] || {}; // 日付が未定義の場合、新しいオブジェクトを作成
         data[selectedDate].memo = memoInput.value;
+
+        // ローカルストレージに保存
         saveData();
-        renderCalendar(currentDate);
+
+        // カレンダーを再描画
+        renderCalendar(currentDate); // 現在の月を再描画
+
+        // メモが保存された状態で選択日付が維持されるようにする
+        const selectedDateText = new Date(selectedDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('memo-date').textContent = selectedDateText;
+        profitInput.value = data[selectedDate]?.profit || 0;
+        expenseInput.value = data[selectedDate]?.expense || 0;
+        memoInput.value = data[selectedDate]?.memo || "";
     }
 });
+
 
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
