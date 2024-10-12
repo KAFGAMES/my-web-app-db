@@ -171,6 +171,11 @@ function renderCalendar(date) {
     calculateMonthlyBalance(year, month);
 }
 
+// ページが完全に読み込まれたらカレンダーを表示する
+document.addEventListener('DOMContentLoaded', function () {
+    renderCalendar(currentDate);  // ページ読み込み時にカレンダーを表示
+});
+
 
 // 目標金額の保存
 goalSaveButton.addEventListener('click', () => {
