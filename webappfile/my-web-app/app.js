@@ -113,6 +113,9 @@ function renderCalendar(date) {
             profitInput.value = data[cellDate]?.profit || 0;
             expenseInput.value = data[cellDate]?.expense || 0;
             memoInput.value = data[cellDate]?.memo || "";
+            
+            const selectedDateText = new Date(cellDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('memo-date').textContent = selectedDateText;
         });
 
         const dateDiv = document.createElement('div');
