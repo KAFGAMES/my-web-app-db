@@ -147,12 +147,12 @@ function renderCalendar(date) {
 
         const profitDiv = document.createElement('div');
         profitDiv.classList.add('profit');
-        profitDiv.textContent = data[cellDate]?.profit ? `利益: ${data[cellDate].profit.toLocaleString()}` : "利益: 0";
+        profitDiv.textContent = data[cellDate]?.profit ? `${data[cellDate].profit.toLocaleString()}` : "0";
         cell.appendChild(profitDiv);
 
         const expenseDiv = document.createElement('div');
         expenseDiv.classList.add('expense');
-        expenseDiv.textContent = data[cellDate]?.expense ? `支出: ${data[cellDate].expense.toLocaleString()}` : "支出: 0";
+        expenseDiv.textContent = data[cellDate]?.expense ? `${data[cellDate].expense.toLocaleString()}` : "0";
         cell.appendChild(expenseDiv);
 
         // 今日の日付を強調表示し、初期選択する
