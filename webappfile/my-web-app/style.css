@@ -34,7 +34,8 @@ body {
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 350px;
+    /*width: 350px;*/
+    width: auto; /* 親要素の幅に引き伸ばされないようにする */
     padding: 16px;
 }
 
@@ -46,13 +47,18 @@ body {
 }
 
 .calendar-table {
-    width: 100%;
+    /*width: 100%;*/
     border-collapse: collapse;
 }
 
 .calendar-table th, .calendar-table td {
     border: 1px solid #ddd;
     text-align: center;
+    word-wrap: break-word; /* 長いテキストを折り返す */
+    white-space: normal;   /* テキストが長い場合に折り返す */
+    overflow: hidden;      /* 枠からはみ出す部分を隠す */
+    width: 100px;  /* 幅を固定 */
+    height: 50px; /* 高さを固定 */
 }
 
 .calendar-table th {
@@ -72,12 +78,20 @@ body {
     font-size: 12px;
     margin-top: 5px;
     color: green;
+    width: 80px;          /* 幅を固定 */
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
 }
 
 .expense {
     font-size: 12px;
     margin-top: 5px;
     color: red;
+    width: 80px;          /* 幅を固定 */
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
 }
 
 .memo-panel {
@@ -96,3 +110,6 @@ body {
     height: 200px;
     resize: none;
 }
+
+
+
