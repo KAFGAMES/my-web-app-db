@@ -30,6 +30,13 @@ function saveData() {
     localStorage.setItem('calendarData', JSON.stringify(data));
 }
 
+// 目標金額を表示する関数
+function displayGoalAmount() {
+    const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    const currentGoal = monthlyGoals[monthKey] || 0;
+    document.getElementById('goal-display').textContent = `現在の目標金額: ${currentGoal}`;
+}
+
 // 今日の日付を選択状態にする関数
 function selectToday() {
     const today = new Date();
@@ -187,6 +194,7 @@ function renderCalendar(date) {
 document.addEventListener('DOMContentLoaded', function () {
     renderCalendar(currentDate);  // カレンダーを現在の月で表示
     selectToday();  // 今日の日付を選択
+    displayGoalAmount(); // 目標金額を表示
 });
 
 
@@ -197,6 +205,7 @@ goalSaveButton.addEventListener('click', () => {
     monthlyGoals[monthKey] = goal;
     localStorage.setItem('monthlyGoals', JSON.stringify(monthlyGoals));
     calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
+    displayGoalAmount(); // 目標金額を更新して表示
 });
 
 // 利益・支出やメモの保存
