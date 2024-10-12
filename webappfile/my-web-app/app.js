@@ -75,7 +75,8 @@ function updateGoalChart(balance, year, month) {
     const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
     const goal = monthlyGoals[monthKey] || 0;
 
-    const percentage = goal > 0 ? (balance / goal) * 100 : 0;
+    const percentage = goal > 0 ? Math.min(100, Math.max(0, (balance / goal) * 100)) : 0;
+
     const chartData = {
         labels: ['達成率', '未達成率'],
         datasets: [{

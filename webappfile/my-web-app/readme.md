@@ -34,3 +34,7 @@ mv index.html .
 git add index.html
 git commit -m "Move index.html to root"
 git push origin main
+
+
+ワークツリーの未コミットの変更をすべて破棄：
+git restore .
