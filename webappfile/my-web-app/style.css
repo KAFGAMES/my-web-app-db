@@ -130,7 +130,10 @@ body {
 .profit, .expense {
     font-size: 12px;
     margin-top: 5px;
-    width: 100%;               /* 幅を100%に設定 */
     text-align: center;         /* 中央揃え */
     white-space: nowrap;
+    width: 100px;
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
 }
