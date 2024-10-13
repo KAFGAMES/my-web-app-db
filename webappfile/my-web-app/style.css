@@ -137,3 +137,25 @@ body {
     text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
     white-space: nowrap;  /* 一行で表示 */
 }
+
+.menu-bar {
+    position: relative;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.menu-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  #category-select {
+    padding: 5px;
+    font-size: 14px;
+  }

@@ -16,12 +16,10 @@ let currentDate = new Date();
 let selectedDate = null;
 let goalChart = null;
 
+let currentCategory = 'web3'; // デフォルトでweb3収益を選択
+
 // データの初期化
-let data = JSON.parse(localStorage.getItem('calendarData')) || {
-//    "2024-10-01": { profit: 7000, expense: 3172, memo: "サンプルメモ" },
-//    "2024-10-02": { profit: 2263, expense: 0, memo: "" },
-//    "2024-10-09": { profit: 1255, expense: 0, memo: "" },
-};
+let data = JSON.parse(localStorage.getItem('calendarData')) || {};
 
 let monthlyGoals = JSON.parse(localStorage.getItem('monthlyGoals')) || {};
 
@@ -44,12 +42,7 @@ function selectToday() {
 
     // 今日の日付を選択
     selectedDate = todayDateString;
-    profitInput.value = data[todayDateString]?.profit || 0;
-    expenseInput.value = data[todayDateString]?.expense || 0;
-    memoInput.value = data[todayDateString]?.memo || "";
-
-    const selectedDateText = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-    document.getElementById('memo-date').textContent = selectedDateText;
+    loadDataForSelectedDate();
 }
 
 // 月間損益を計算する関数
@@ -57,9 +50,15 @@ function calculateMonthlyBalance(year, month) {
     let totalProfit = 0;
     let totalExpense = 0;
 
-    for (const [key, value] of Object.entries(data)) {
-        const date = new Date(key);
-        if (date.getFullYear() === year && date.getMonth() === month) {
+    // 現在のカテゴリーに基づいて計算
+    const dataForCurrentCategory = data[currentCategory] || {};
+
+    for (const [key, value] of Object.entries(dataForCurrentCategory)) {
+        const [dateYearStr, dateMonthStr, dateDayStr] = key.split('-');
+        const dateYear = parseInt(dateYearStr, 10);
+        const dateMonth = parseInt(dateMonthStr, 10) - 1; // 月は0始まり
+
+        if (dateYear === year && dateMonth === month) {
             totalProfit += value.profit || 0;
             totalExpense += value.expense || 0;
         }
@@ -74,7 +73,7 @@ function calculateMonthlyBalance(year, month) {
         monthlyBalanceDiv.style.color = 'red';
     }
 
-    updateGoalChart(balance, year, month);
+    updateGoalChart(balance, year, month);  // 目標達成率のグラフを更新
 }
 
 // 円グラフを更新する関数
@@ -115,8 +114,6 @@ function updateGoalChart(balance, year, month) {
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
-
-    // 今日の日付を取得
     const today = new Date();
     const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -126,69 +123,74 @@ function renderCalendar(date) {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    let row = document.createElement('tr');
-    for (let i = 0; i < firstDay; i++) {
-        row.appendChild(document.createElement('td'));
+    let dateCount = 1;
+    let rowCount = Math.ceil((firstDay + daysInMonth) / 7);
+
+    for (let row = 0; row < rowCount; row++) {
+        let tr = document.createElement('tr');
+        for (let col = 0; col < 7; col++) {
+            let cell = document.createElement('td');
+            if (row === 0 && col < firstDay) {
+                // 空白セル
+            } else if (dateCount > daysInMonth) {
+                // 空白セル
+            } else {
+                const cellDateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dateCount).padStart(2, '0')}`;
+
+                // 現在のカテゴリーに基づいたデータを使用
+                const dataForCurrentCategory = data[currentCategory] || {};
+                const dayData = dataForCurrentCategory[cellDateString] || { profit: 0, expense: 0, memo: "" };
+
+                cell.addEventListener('click', () => {
+                    selectedDate = cellDateString;
+                    loadDataForSelectedDate();
+                });
+
+                const dateDiv = document.createElement('div');
+                dateDiv.textContent = dateCount;
+                cell.appendChild(dateDiv);
+
+                const profitDiv = document.createElement('div');
+                profitDiv.classList.add('profit');
+                profitDiv.textContent = `${dayData.profit.toLocaleString()}`;
+                cell.appendChild(profitDiv);
+
+                const expenseDiv = document.createElement('div');
+                expenseDiv.classList.add('expense');
+                expenseDiv.textContent = `${dayData.expense.toLocaleString()}`;
+                cell.appendChild(expenseDiv);
+
+                // 今日の日付を強調表示
+                if (cellDateString === todayDateString) {
+                    cell.classList.add('today');
+                }
+
+                dateCount++;
+            }
+            tr.appendChild(cell);
+        }
+        calendarBody.appendChild(tr);
     }
 
-    for (let day = 1; day <= daysInMonth; day++) {
-        const cell = document.createElement('td');
-        const cellDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-        // メモがあるか確認
-        const memoExists = data[cellDate]?.memo && data[cellDate].memo.trim() !== "";
-
-        cell.addEventListener('click', () => {
-            selectedDate = cellDate;
-            profitInput.value = data[cellDate]?.profit || 0;
-            expenseInput.value = data[cellDate]?.expense || 0;
-            memoInput.value = data[cellDate]?.memo || "";
-
-            const selectedDateText = new Date(cellDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('memo-date').textContent = selectedDateText;
-        });
-
-        const dateDiv = document.createElement('div');
-        dateDiv.textContent = day;
-        cell.appendChild(dateDiv);
-
-        const profitDiv = document.createElement('div');
-        profitDiv.classList.add('profit');
-        profitDiv.textContent = data[cellDate]?.profit ? `${data[cellDate].profit.toLocaleString()}` : "0";
-        cell.appendChild(profitDiv);
-
-        const expenseDiv = document.createElement('div');
-        expenseDiv.classList.add('expense');
-        expenseDiv.textContent = data[cellDate]?.expense ? `${data[cellDate].expense.toLocaleString()}` : "0";
-        cell.appendChild(expenseDiv);
-
-        // 今日の日付を強調表示し、初期選択する
-        if (cellDate === todayDateString) {
-            cell.classList.add('today');
-        }
-
-        // メモが存在する場合にクラスを追加して背景色を変更
-        // ただし、今日の日付はオレンジ色のまま
-        if (memoExists && cellDate !== todayDateString) {
-            cell.classList.add('memo-exists');
-        }
-
-        row.appendChild(cell);
-
-        if ((firstDay + day) % 7 === 0) {
-            calendarBody.appendChild(row);
-            row = document.createElement('tr');
-        }
-    }
-
-    if (row.children.length > 0) {
-        calendarBody.appendChild(row);
-    }
-
-    calculateMonthlyBalance(year, month);
+    calculateMonthlyBalance(year, month);  // 月間損益の計算
 }
 
+// 選択された日付のデータをロードする関数
+function loadDataForSelectedDate() {
+    const dateToLoad = selectedDate || new Date().toISOString().split('T')[0];
+    const categoryData = data[currentCategory]?.[dateToLoad] || { profit: 0, expense: 0, memo: "" };
 
+    profitInput.value = categoryData.profit || 0;
+    expenseInput.value = categoryData.expense || 0;
+    memoInput.value = categoryData.memo || "";
+
+    // 日付文字列を手動でパースしてDateオブジェクトを作成
+    const [yearStr, monthStr, dayStr] = dateToLoad.split('-');
+    const dateObj = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, parseInt(dayStr, 10));
+
+    const selectedDateText = dateObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('memo-date').textContent = selectedDateText;
+}
 
 // ページが読み込まれたら今日の日付を選択する
 document.addEventListener('DOMContentLoaded', function () {
@@ -197,6 +199,12 @@ document.addEventListener('DOMContentLoaded', function () {
     displayGoalAmount(); // 目標金額を表示
 });
 
+// プルダウンメニューの選択に応じてデータを切り替える
+document.getElementById('category-select').addEventListener('change', function() {
+    currentCategory = this.value; // 現在のカテゴリーを更新
+    loadDataForSelectedDate(); // 選択された日付のデータをロード
+    renderCalendar(currentDate); // カレンダーの再描画
+});
 
 // 目標金額の保存
 goalSaveButton.addEventListener('click', () => {
@@ -208,50 +216,54 @@ goalSaveButton.addEventListener('click', () => {
     displayGoalAmount(); // 目標金額を更新して表示
 });
 
-// 利益・支出やメモの保存
+// 利益・支出の保存
 saveButton.addEventListener('click', () => {
     if (selectedDate) {
-        data[selectedDate] = {
-            profit: parseInt(profitInput.value, 10) || 0,
-            expense: parseInt(expenseInput.value, 10) || 0,
-            memo: data[selectedDate]?.memo || ""
-        };
+        data[currentCategory] = data[currentCategory] || {};
+        data[currentCategory][selectedDate] = data[currentCategory][selectedDate] || {};
+
+        data[currentCategory][selectedDate].profit = parseInt(profitInput.value, 10) || 0;
+        data[currentCategory][selectedDate].expense = parseInt(expenseInput.value, 10) || 0;
+        // メモは上書きしない
+
         saveData();
-        renderCalendar(currentDate);
+        renderCalendar(currentDate); // カレンダーの再描画
     }
 });
 
-// メモ保存のイベントリスナーを修正
+// メモの保存
 memoSaveButton.addEventListener('click', () => {
     if (selectedDate) {
-        // メモをデータに保存
-        data[selectedDate] = data[selectedDate] || {}; // 日付が未定義の場合、新しいオブジェクトを作成
-        data[selectedDate].memo = memoInput.value;
+        data[currentCategory] = data[currentCategory] || {};
+        data[currentCategory][selectedDate] = data[currentCategory][selectedDate] || {};
 
-        // ローカルストレージに保存
-        saveData();
+        // 既存の利益と支出データを保持したままメモを更新
+        const currentProfit = data[currentCategory][selectedDate].profit || 0;
+        const currentExpense = data[currentCategory][selectedDate].expense || 0;
+        const currentMemo = memoInput.value;
 
-        // カレンダーを再描画
-        renderCalendar(currentDate); // 現在の月を再描画
+        data[currentCategory][selectedDate] = {
+            profit: currentProfit,
+            expense: currentExpense,
+            memo: currentMemo // メモだけを更新
+        };
 
-        // メモが保存された状態で選択日付が維持されるようにする
-        const selectedDateText = new Date(selectedDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-        document.getElementById('memo-date').textContent = selectedDateText;
-        profitInput.value = data[selectedDate]?.profit || 0;
-        expenseInput.value = data[selectedDate]?.expense || 0;
-        memoInput.value = data[selectedDate]?.memo || "";
+        saveData(); // ローカルストレージに保存
+        loadDataForSelectedDate(); // 選択された日付のデータを再読み込み
+        renderCalendar(currentDate); // カレンダーを再描画して更新
     }
 });
-
 
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar(currentDate);
+    displayGoalAmount(); // 月が変わったら目標金額を更新
 });
 
 nextMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar(currentDate);
+    displayGoalAmount(); // 月が変わったら目標金額を更新
 });
 
 renderCalendar(currentDate);
