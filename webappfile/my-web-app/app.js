@@ -18,9 +18,9 @@ let goalChart = null;
 
 // データの初期化
 let data = JSON.parse(localStorage.getItem('calendarData')) || {
-    "2024-10-01": { profit: 7000, expense: 3172, memo: "サンプルメモ" },
-    "2024-10-02": { profit: 2263, expense: 0, memo: "" },
-    "2024-10-09": { profit: 1255, expense: 0, memo: "" },
+//    "2024-10-01": { profit: 7000, expense: 3172, memo: "サンプルメモ" },
+//    "2024-10-02": { profit: 2263, expense: 0, memo: "" },
+//    "2024-10-09": { profit: 1255, expense: 0, memo: "" },
 };
 
 let monthlyGoals = JSON.parse(localStorage.getItem('monthlyGoals')) || {};
