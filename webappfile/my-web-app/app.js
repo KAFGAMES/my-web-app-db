@@ -28,10 +28,27 @@ function saveData() {
     localStorage.setItem('calendarData', JSON.stringify(data));
 }
 
+// 各カテゴリごとの目標金額を保存
+function saveGoalForCategory(category, year, month, goalAmount) {
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    if (!monthlyGoals[category]) {
+        monthlyGoals[category] = {};  // カテゴリごとのオブジェクトを初期化
+    }
+    monthlyGoals[category][monthKey] = goalAmount;
+    localStorage.setItem('monthlyGoals', JSON.stringify(monthlyGoals));
+}
+
+// カテゴリと月に応じた目標金額を取得
+function getGoalForCategory(category, year, month) {
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+    return (monthlyGoals[category] && monthlyGoals[category][monthKey]) || 0;
+}
+
 // 目標金額を表示する関数
 function displayGoalAmount() {
-    const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-    const currentGoal = monthlyGoals[monthKey] || 0;
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const currentGoal = getGoalForCategory(currentCategory, year, month);
     document.getElementById('goal-display').textContent = `現在の目標金額: ${currentGoal}`;
 }
 
@@ -79,7 +96,7 @@ function calculateMonthlyBalance(year, month) {
 // 円グラフを更新する関数
 function updateGoalChart(balance, year, month) {
     const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-    const goal = monthlyGoals[monthKey] || 0;
+    const goal = getGoalForCategory(currentCategory, year, month);
 
     const percentage = goal > 0 ? Math.min(100, Math.max(0, (balance / goal) * 100)) : 0;
 
@@ -213,17 +230,43 @@ document.getElementById('category-select').addEventListener('change', function()
     currentCategory = this.value; // 現在のカテゴリーを更新
     loadDataForSelectedDate(); // 選択された日付のデータをロード
     renderCalendar(currentDate); // カレンダーの再描画
+    displayGoalAmount();  // カテゴリに応じた目標金額を表示
 });
 
 // 目標金額の保存
 goalSaveButton.addEventListener('click', () => {
     const goal = parseInt(goalInput.value, 10) || 0;
-    const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-    monthlyGoals[monthKey] = goal;
-    localStorage.setItem('monthlyGoals', JSON.stringify(monthlyGoals));
-    calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
-    displayGoalAmount(); // 目標金額を更新して表示
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    saveGoalForCategory(currentCategory, year, month, goal);  // カテゴリごとに目標を保存
+    displayGoalAmount();  // 目標金額を更新して表示
+
+    // 目標達成率のグラフを更新するために、現在の収支（balance）を計算
+    const balance = calculateCurrentBalanceForMonth(year, month);
+    updateGoalChart(balance, year, month);  // グラフを再描画
 });
+
+// 現在の月の収支（利益 - 支出）を計算する関数を追加
+function calculateCurrentBalanceForMonth(year, month) {
+    let totalProfit = 0;
+    let totalExpense = 0;
+
+    // 現在のカテゴリーに基づいて計算
+    const dataForCurrentCategory = data[currentCategory] || {};
+
+    for (const [key, value] of Object.entries(dataForCurrentCategory)) {
+        const [dateYearStr, dateMonthStr] = key.split('-');
+        const dateYear = parseInt(dateYearStr, 10);
+        const dateMonth = parseInt(dateMonthStr, 10) - 1; // 月は0始まり
+
+        if (dateYear === year && dateMonth === month) {
+            totalProfit += value.profit || 0;
+            totalExpense += value.expense || 0;
+        }
+    }
+
+    return totalProfit - totalExpense;  // 収支（利益 - 支出）を返す
+}
 
 // 利益・支出の保存
 saveButton.addEventListener('click', () => {
