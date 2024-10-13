@@ -148,6 +148,15 @@ function renderCalendar(date) {
 
                 const dateDiv = document.createElement('div');
                 dateDiv.textContent = dateCount;
+
+// メモがある場合は日付の横に●を追加
+if (dayData.memo && dayData.memo.trim() !== "") {
+    const memoDot = document.createElement('span');
+    memoDot.textContent = "●"; // ●を追加
+    memoDot.classList.add('memo-dot');  // memo-dotクラスを追加
+    dateDiv.appendChild(memoDot);
+}
+
                 cell.appendChild(dateDiv);
 
                 const profitDiv = document.createElement('div');

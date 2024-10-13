@@ -159,3 +159,18 @@ body {
     padding: 5px;
     font-size: 14px;
   }
+
+  .profit-label {
+    color: green; /* 利益のラベルを緑色にする */
+}
+
+.expense-label {
+    color: red; /* 支出のラベルを赤色にする */
+}
+
+.memo-dot {
+    font-size: 12px;  /* 小さなサイズで表示 */
+    color: rgb(38, 0, 255);       /* ●の色を赤にする（必要に応じて変更） */
+    margin-left: 5px; /* 日付との間に少しスペースを追加 */
+    vertical-align: middle; /* ●が縦に広がらないように中央揃え */
+}
