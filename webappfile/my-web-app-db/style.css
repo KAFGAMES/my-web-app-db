@@ -1,0 +1,176 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.input-panel, .goal-panel {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calendar {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /*width: 350px;*/
+    width: auto; /* 親要素の幅に引き伸ばされないようにする */
+    padding: 16px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.calendar-table {
+    /*width: 100%;*/
+    border-collapse: collapse;
+}
+
+.calendar-table th, .calendar-table td {
+    border: 1px solid #ddd;
+    text-align: center;
+    word-wrap: break-word; /* 長いテキストを折り返す */
+    white-space: normal;   /* テキストが長い場合に折り返す */
+    overflow: hidden;      /* 枠からはみ出す部分を隠す */
+    width: 100px;  /* 幅を固定 */
+    height: 50px; /* 高さを固定 */
+}
+
+.calendar-table th {
+    background-color: #f4f4f4;
+}
+
+.calendar-table td:hover {
+    background-color: #f0f8ff;
+    cursor: pointer;
+}
+
+.calendar-table .today {
+    background-color: #ffeb3b;
+}
+
+.profit {
+    font-size: 12px;
+    margin-top: 5px;
+    color: green;
+    width: 80px;          /* 幅を固定 */
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
+    text-align: center;  /* 中央揃え */
+    display: flex;       /* フレックスボックスで中央寄せ */
+    justify-content: center;  /* 横方向の中央揃え */
+    align-items: center;      /* 縦方向の中央揃え */
+}
+
+.expense {
+    font-size: 12px;
+    margin-top: 5px;
+    color: red;
+    width: 80px;          /* 幅を固定 */
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
+    text-align: center;  /* 中央揃え */
+    display: flex;       /* フレックスボックスで中央寄せ */
+    justify-content: center;  /* 横方向の中央揃え */
+    align-items: center;      /* 縦方向の中央揃え */
+}
+
+.memo-panel {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 16px;
+}
+
+.memo-panel textarea {
+    width: 100%;
+    height: 200px;
+    resize: none;
+}
+
+.memo-exists {
+    background-color: #ffffcc;  /* 薄い黄色 */
+}
+
+.today {
+    background-color: #ffcc99;  /* オレンジ色 */
+}
+
+.profit, .expense {
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: center;         /* 中央揃え */
+    white-space: nowrap;
+    width: 100px;
+    overflow: hidden;     /* はみ出す部分を隠す */
+    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
+    white-space: nowrap;  /* 一行で表示 */
+}
+
+.menu-bar {
+    position: relative;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.menu-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  #category-select {
+    padding: 5px;
+    font-size: 14px;
+  }
+
+  .profit-label {
+    color: green; /* 利益のラベルを緑色にする */
+}
+
+.expense-label {
+    color: red; /* 支出のラベルを赤色にする */
+}
+
+.memo-dot {
+    font-size: 12px;  /* 小さなサイズで表示 */
+    color: rgb(38, 0, 255);       /* ●の色を赤にする（必要に応じて変更） */
+    margin-left: 5px; /* 日付との間に少しスペースを追加 */
+    vertical-align: middle; /* ●が縦に広がらないように中央揃え */
+}
