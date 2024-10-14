@@ -50,31 +50,34 @@ Google Chromeの場合:
 
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-1. PlanetScaleのセットアップ
-PlanetScaleのアカウントを作成: PlanetScaleの公式サイトにアクセスし、無料アカウントを作成します。
-新しいデータベースの作成: ダッシュボードから「Create Database」を選択して新しいデータベースを作成します。
-ブランチの作成: PlanetScaleはGitのようなブランチ管理機能を持っています。最初のブランチを作成してデータベースに接続できる状態にします。
-接続情報の取得: 作成したデータベースに接続するための「Connection Details」（接続情報）を確認し、これを後で使います。MySQLクライアント、Node.js、または他の言語から接続可能です。
-2. VSCODEでプログラミングを始める
-VSCODEのインストール: まだインストールしていない場合は、Visual Studio Codeをダウンロードしてインストールします。
+Railway.appは、Herokuに似たシンプルで柔軟なクラウドホスティングプラットフォームで、無料でMySQLなどのデータベースをセットアップするのに適しています。以下に、Railway.appのセットアップ手順を説明します。
 
-Node.jsプロジェクトの作成（例としてNode.jsを使用する場合）:
+1. Railway.appのアカウント作成
+Railway.appの公式サイトにアクセスします。
+「Start Deploying」または「Sign in」をクリックして、GitHubアカウントを使ってログインします。RailwayはGitHubアカウントと連携するため、GitHubのアカウントが必要です。
+2. 新しいプロジェクトを作成
+ログイン後、Railwayのダッシュボードにアクセスします。
+「New Project」をクリックして、新しいプロジェクトを作成します。
+テンプレートの選択またはGitHubリポジトリからのデプロイを行うことができますが、最も簡単なのは「Empty Project」を選択して、空のプロジェクトから始めることです。
+3. MySQLデータベースの追加
+プロジェクトが作成されたら、Railwayのダッシュボードで「Add New」をクリックし、データベースの選択画面に進みます。
+「Provision Database」のオプションから「MySQL」を選択します。
+MySQLデータベースが自動的にプロビジョニングされ、Railwayが接続情報を生成します。
+4. 接続情報の取得
+MySQLデータベースが追加されると、Railwayは接続情報（ホスト名、ユーザー名、パスワード、データベース名など）を表示します。
+これらの接続情報をコピーして、後でVSCODEやMySQL Workbenchなどで使用します。
+5. アプリケーションとの連携
+RailwayはGitHubと連携しているので、簡単にデプロイが可能です。また、手動でのデプロイもサポートされています。例えば、Node.jsを使っている場合は、以下のようにMySQLデータベースと接続できます。
 
-VSCODEで新しいフォルダを作成し、ターミナルを開きます。
-npm init -y コマンドで新しいNode.jsプロジェクトを初期化します。
-MySQLライブラリをインストールします：npm install mysql2。
-PlanetScaleに接続するコードの作成:
-
-app.js などのファイルを作成し、以下のようにMySQLデータベースに接続します。
 javascript
 コードをコピーする
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-    host: 'your-planetscale-host',
-    user: 'your-username',
-    password: 'your-password',
-    database: 'your-database'
+    host: 'your-hostname',  // Railwayが提供するホスト名
+    user: 'your-username',  // Railwayが提供するユーザー名
+    password: 'your-password',  // Railwayが提供するパスワード
+    database: 'your-database'  // Railwayが提供するデータベース名
 });
 
 connection.connect((err) => {
@@ -82,8 +85,29 @@ connection.connect((err) => {
         console.error('Error connecting to the database:', err);
         return;
     }
-    console.log('Connected to PlanetScale!');
+    console.log('Connected to Railway MySQL!');
 });
+6. デプロイと管理
+GitHubリポジトリと連携している場合、Railwayが自動的にコードをデプロイします。
+Railwayのダッシュボードからデータベースの管理や接続情報の変更、ログの確認が可能です。
+7. Railwayの無料プラン
+Railwayは無料プランを提供しており、毎月一定のリソース（クレジット）を無料で使うことができます。個人プロジェクトや少量のデータベース操作に十分です。
+
+結論
+Railway.appは非常にシンプルで、無料でMySQLデータベースをセットアップできます。GitHubとの連携で自動デプロイも可能なので、開発・運用が簡単です。
 クエリの実行: 接続が成功したら、データベースに対してクエリを実行し、データを取得・挿入するコードを作成できます。
 
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+CREATE TABLE financial_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    date DATE NOT NULL,
+    income DECIMAL(10, 2) DEFAULT 0,
+    expense DECIMAL(10, 2) DEFAULT 0,
+    target_amount DECIMAL(10, 2),
+    memo TEXT
+);
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
