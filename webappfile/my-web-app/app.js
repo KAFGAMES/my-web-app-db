@@ -59,6 +59,13 @@ function selectToday() {
 
     // 今日の日付を選択
     selectedDate = todayDateString;
+
+// 今日の日付のセルに .selected クラスを追加
+const todayCell = document.querySelector(`[data-date="${todayDateString}"]`);
+if (todayCell) {
+    todayCell.classList.add('selected');
+}
+
     loadDataForSelectedDate();
 }
 
@@ -153,12 +160,21 @@ function renderCalendar(date) {
                 // 空白セル
             } else {
                 const cellDateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dateCount).padStart(2, '0')}`;
-
+                cell.setAttribute('data-date', cellDateString);
                 // 現在のカテゴリーに基づいたデータを使用
                 const dataForCurrentCategory = data[currentCategory] || {};
                 const dayData = dataForCurrentCategory[cellDateString] || { profit: 0, expense: 0, memo: "" };
 
                 cell.addEventListener('click', () => {
+
+                     // 既に選択されている日付から .selected クラスを削除
+    const previouslySelected = document.querySelector('.selected');
+    if (previouslySelected) {
+        previouslySelected.classList.remove('selected');
+    }
+
+    // 現在選択された日付に .selected クラスを追加
+    cell.classList.add('selected');
                     selectedDate = cellDateString;
                     loadDataForSelectedDate();
                 });

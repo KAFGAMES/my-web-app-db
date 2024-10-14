@@ -174,3 +174,12 @@ body {
     margin-left: 5px; /* 日付との間に少しスペースを追加 */
     vertical-align: middle; /* ●が縦に広がらないように中央揃え */
 }
+
+.selected {
+    background-color: #ffcc99;  /* オレンジ色 */
+}
+
+/* .today と .selected 両方が適用される場合には selected を優先する */
+.today.selected {
+    background-color: #ffcc99;  /* 今日が選択されている場合もオレンジ色に */
+}
