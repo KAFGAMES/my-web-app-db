@@ -111,3 +111,20 @@ CREATE TABLE financial_records (
     memo TEXT
 );
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+mysql -u root -p railway < my-node-app/db/create_tables.sql
+
+
+mysql -u root -p
+CREATE DATABASE railway;
+USE railway;
+
+Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p railway
+
+mysql -u root -p
+
+USE railway;
+
+
+SHOW TABLES;
+
+exit
