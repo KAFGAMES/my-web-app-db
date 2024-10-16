@@ -58,7 +58,9 @@ body {
     white-space: normal;   /* テキストが長い場合に折り返す */
     overflow: hidden;      /* 枠からはみ出す部分を隠す */
     width: 100px;  /* 幅を固定 */
-    height: 50px; /* 高さを固定 */
+    height: 80px; /* 高さを調整 */
+    vertical-align: top; /* 内容を上に揃える */
+    position: relative; /* 相対位置を設定 */
 }
 
 .calendar-table th {
@@ -78,28 +80,22 @@ body {
     font-size: 12px;
     margin-top: 5px;
     color: green;
-    width: 80px;          /* 幅を固定 */
-    overflow: hidden;     /* はみ出す部分を隠す */
-    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
-    white-space: nowrap;  /* 一行で表示 */
-    text-align: center;  /* 中央揃え */
-    display: flex;       /* フレックスボックスで中央寄せ */
-    justify-content: center;  /* 横方向の中央揃え */
-    align-items: center;      /* 縦方向の中央揃え */
+    width: 100%;          /* 幅を調整 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;  /* 左揃え */
 }
 
 .expense {
     font-size: 12px;
     margin-top: 5px;
     color: red;
-    width: 80px;          /* 幅を固定 */
-    overflow: hidden;     /* はみ出す部分を隠す */
-    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
-    white-space: nowrap;  /* 一行で表示 */
-    text-align: center;  /* 中央揃え */
-    display: flex;       /* フレックスボックスで中央寄せ */
-    justify-content: center;  /* 横方向の中央揃え */
-    align-items: center;      /* 縦方向の中央揃え */
+    width: 100%;          /* 幅を調整 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;  /* 左揃え */
 }
 
 .memo-panel {
@@ -127,17 +123,6 @@ body {
     background-color: #ffcc99;  /* オレンジ色 */
 }
 
-.profit, .expense {
-    font-size: 12px;
-    margin-top: 5px;
-    text-align: center;         /* 中央揃え */
-    white-space: nowrap;
-    width: 100px;
-    overflow: hidden;     /* はみ出す部分を隠す */
-    text-overflow: ellipsis; /* はみ出した場合に「...」を表示 */
-    white-space: nowrap;  /* 一行で表示 */
-}
-
 .menu-bar {
     position: relative;
     width: 100%;
@@ -153,26 +138,19 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-  }
-  
-  #category-select {
+}
+
+#category-select {
     padding: 5px;
     font-size: 14px;
-  }
+}
 
-  .profit-label {
+.profit-label {
     color: green; /* 利益のラベルを緑色にする */
 }
 
 .expense-label {
     color: red; /* 支出のラベルを赤色にする */
-}
-
-.memo-dot {
-    font-size: 12px;  /* 小さなサイズで表示 */
-    color: rgb(38, 0, 255);       /* ●の色を赤にする（必要に応じて変更） */
-    margin-left: 5px; /* 日付との間に少しスペースを追加 */
-    vertical-align: middle; /* ●が縦に広がらないように中央揃え */
 }
 
 .selected {
@@ -182,4 +160,11 @@ body {
 /* .today と .selected 両方が適用される場合には selected を優先する */
 .today.selected {
     background-color: #ffcc99;  /* 今日が選択されている場合もオレンジ色に */
+}
+
+/* 日付番号を表示するスタイルを追加 */
+.date-number {
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 5px;
 }

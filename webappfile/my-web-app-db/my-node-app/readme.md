@@ -17,3 +17,18 @@ income	DECIMAL(10, 2)	収益（0または収益金額）
 expense	DECIMAL(10, 2)	支出（0または支出金額）
 target_amount	DECIMAL(10, 2)	目標金額
 memo	TEXT	メモやコメント
+
+USE KAFGAMES;
+
+mysql -u root -p
+
+DROP TABLE IF EXISTS calendar_data;
+DROP TABLE IF EXISTS monthly_goals;
+DROP TABLE IF EXISTS users;
+Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p KAFGAMES
+
+node my-node-app/server.js
+
+
+
+http://localhost:3306/

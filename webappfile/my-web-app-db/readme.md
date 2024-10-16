@@ -119,6 +119,8 @@ CREATE DATABASE railway;
 USE railway;
 
 Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p railway
+Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p KAFGAMES
+
 
 mysql -u root -p
 
@@ -128,3 +130,9 @@ USE railway;
 SHOW TABLES;
 
 exit
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+①
+railwayサーバー立ち上げ
+②
+Node.jsのサーバーを起動します。通常、app.js をサーバーとして使用している場合
+node my-node-app/server.js

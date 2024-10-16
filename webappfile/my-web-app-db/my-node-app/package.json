@@ -8,8 +8,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "cd my-node-app",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
     "mysql2": "^3.11.3"
   }
 }

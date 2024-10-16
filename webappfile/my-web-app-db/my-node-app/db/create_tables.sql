@@ -1,16 +1,25 @@
-CREATE TABLE calendar_data (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    date DATE,
-    category VARCHAR(50),
-    profit DECIMAL(10, 2),
-    expense DECIMAL(10, 2),
-    memo TEXT
+CREATE TABLE IF NOT EXISTS calendar_data (
+    date DATE NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    profit INT DEFAULT 0,
+    expense INT DEFAULT 0,
+    memo TEXT,
+    PRIMARY KEY (date, category)
 );
 
-CREATE TABLE monthly_goals (
+
+CREATE TABLE IF NOT EXISTS monthly_goals (
+    category VARCHAR(255) NOT NULL,
+    year INT NOT NULL,
+    month INT NOT NULL,
+    goal_amount INT DEFAULT 0,
+    PRIMARY KEY (category, year, month)
+);
+
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    category VARCHAR(50),
-    year INT,
-    month INT,
-    goal_amount DECIMAL(10, 2)
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    password VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
