@@ -55,7 +55,9 @@ function renderCalendar(date) {
     loadDataForMonth(currentCategory, date, (dataForMonth) => {
         const dataMap = {};
         dataForMonth.forEach((entry) => {
-            dataMap[entry.date] = entry;
+            const dateObj = new Date(entry.date);
+            const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+            dataMap[formattedDate] = entry;
         });
 
         for (let row = 0; row < rowCount; row++) {
@@ -81,9 +83,17 @@ function renderCalendar(date) {
                         cell.classList.add('today');
                     }
 
+                    console.log('cellDateString:', cellDateString);
+console.log('dataMap:', dataMap);
+console.log('dataMap[cellDateString]:', dataMap[cellDateString]);
+
                     // データがある場合は収益と支出を表示
                     if (dataMap[cellDateString]) {
                         const entry = dataMap[cellDateString];
+
+                        // デバッグ用のログ出力
+            console.log('セルの日付:', cellDateString);
+            console.log('対応するデータ:', entry);
 
                         const profitDiv = document.createElement('div');
                         profitDiv.classList.add('profit');

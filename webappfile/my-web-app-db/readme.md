@@ -136,3 +136,7 @@ railwayサーバー立ち上げ
 ②
 Node.jsのサーバーを起動します。通常、app.js をサーバーとして使用している場合
 node my-node-app/server.js
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+console.log('cellDateString:', cellDateString);
+console.log('dataMap:', dataMap);
+console.log('dataMap[cellDateString]:', dataMap[cellDateString]);
