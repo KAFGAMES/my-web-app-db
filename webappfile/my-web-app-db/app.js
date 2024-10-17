@@ -383,10 +383,154 @@ document.addEventListener('DOMContentLoaded', function () {
 // プルダウンメニューの選択に応じてデータを切り替える
 document.getElementById('category-select').addEventListener('change', function() {
     currentCategory = this.value; // 現在のカテゴリーを更新
-    loadDataForSelectedDate(); // 選択された日付のデータをロード
-    renderCalendar(currentDate); // カレンダーの再描画
-    displayGoalAmount();  // カテゴリに応じた目標金額を表示
+    
+    if (currentCategory === 'total') {
+        // 「合計」が選択されている場合、データの入力と保存ボタンを無効化
+        profitInput.disabled = true;
+        expenseInput.disabled = true;
+        saveButton.disabled = true;
+        goalInput.disabled = true;
+        goalSaveButton.disabled = true;
+        renderCalendarWithTotal(); // 合計のデータでカレンダーを表示
+        calculateTotalGoalAndUpdateChart(); // 合計用の円グラフを更新
+    } else {
+        // 他のカテゴリが選択されている場合、入力と保存を有効化
+        profitInput.disabled = false;
+        expenseInput.disabled = false;
+        saveButton.disabled = false;
+        goalInput.disabled = false;
+        goalSaveButton.disabled = false;
+        loadDataForSelectedDate(); // 選択された日付のデータをロード
+        renderCalendar(currentDate); // カレンダーの再描画
+        displayGoalAmount();  // カテゴリに応じた目標金額を表示
+    }
 });
+
+// 合計を計算してカレンダーに表示する関数
+function renderCalendarWithTotal() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+
+    let totalDataMap = {};
+
+    let fetchPromises = categories.map(category => {
+        return new Promise((resolve) => {
+            loadDataForMonth(category, currentDate, (dataForMonth) => {
+                dataForMonth.forEach((entry) => {
+                    const dateObj = new Date(entry.date);
+                    const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
+                    if (!totalDataMap[formattedDate]) {
+                        totalDataMap[formattedDate] = { profit: 0, expense: 0 };
+                    }
+
+                    totalDataMap[formattedDate].profit += entry.profit || 0;
+                    totalDataMap[formattedDate].expense += entry.expense || 0;
+                });
+                resolve();
+            });
+        });
+    });
+
+    Promise.all(fetchPromises).then(() => {
+        renderCalendarWithData(totalDataMap);
+        calculateMonthlyTotalBalance(totalDataMap);
+    });
+}
+// 月間合計収支を計算する関数
+function calculateMonthlyTotalBalance(dataMap) {
+    let totalProfit = 0;
+    let totalExpense = 0;
+
+    for (let date in dataMap) {
+        totalProfit += dataMap[date].profit;
+        totalExpense += dataMap[date].expense;
+    }
+
+    const balance = totalProfit - totalExpense;
+    monthlyBalanceDiv.textContent = `月間損益: ${balance}`;
+
+    if (balance >= 0) {
+        monthlyBalanceDiv.style.color = 'green';
+    } else {
+        monthlyBalanceDiv.style.color = 'red';
+    }
+}
+
+// データを基にカレンダーを描画する関数
+function renderCalendarWithData(dataMap) {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const today = new Date();
+    const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    calendarBody.innerHTML = ''; // カレンダーを初期化
+    monthYear.textContent = `${year}年${month + 1}月`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let dateCount = 1;
+    let rowCount = Math.ceil((firstDay + daysInMonth) / 7);
+
+    for (let row = 0; row < rowCount; row++) {
+        let tr = document.createElement('tr');
+        for (let col = 0; col < 7; col++) {
+            let cell = document.createElement('td');
+            if (row === 0 && col < firstDay) {
+                cell.textContent = '';
+            } else if (dateCount > daysInMonth) {
+                cell.textContent = '';
+            } else {
+                const cellDateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(dateCount).padStart(2, '0')}`;
+                cell.setAttribute('data-date', cellDateString);
+
+                // 日付番号を表示するための <div> を作成
+                const dateNumberDiv = document.createElement('div');
+                dateNumberDiv.classList.add('date-number');
+                dateNumberDiv.textContent = dateCount;
+                cell.appendChild(dateNumberDiv);
+
+                // 今日の日付を強調表示
+                if (cellDateString === todayDateString) {
+                    cell.classList.add('today');
+                }
+
+                // データがある場合は収益と支出を表示
+                if (dataMap[cellDateString]) {
+                    const entry = dataMap[cellDateString];
+
+                    const profitDiv = document.createElement('div');
+                    profitDiv.classList.add('profit');
+                    profitDiv.textContent = `収益: ${entry.profit}`;
+
+                    const expenseDiv = document.createElement('div');
+                    expenseDiv.classList.add('expense');
+                    expenseDiv.textContent = `支出: ${entry.expense}`;
+
+                    cell.appendChild(profitDiv);
+                    cell.appendChild(expenseDiv);
+                }
+
+                cell.addEventListener('click', () => {
+                    // 既に選択されている日付から .selected クラスを削除
+                    const previouslySelected = document.querySelector('.selected');
+                    if (previouslySelected) {
+                        previouslySelected.classList.remove('selected');
+                    }
+                    cell.classList.add('selected');
+                    selectedDate = cellDateString;
+                    loadDataForSelectedDate();
+                });
+
+                dateCount++;
+            }
+            tr.appendChild(cell);
+        }
+        calendarBody.appendChild(tr);
+    }
+}
 
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
@@ -401,3 +545,57 @@ nextMonthButton.addEventListener('click', () => {
 });
 
 //renderCalendar(currentDate);
+
+// 合計目標金額を計算して円グラフを更新する関数
+function calculateTotalGoalAndUpdateChart() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+
+    let totalGoal = 0;
+    let fetchPromises = categories.map(category => {
+        return new Promise((resolve) => {
+            getGoalForCategory(category, year, month, (goalAmount) => {
+                totalGoal += goalAmount;
+                resolve();
+            });
+        });
+    });
+
+    Promise.all(fetchPromises).then(() => {
+        calculateCurrentBalanceForMonth(year, month, (totalBalance) => {
+            updateGoalChartForTotal(totalBalance, totalGoal); // グラフを合計用に更新
+        });
+    });
+}
+
+// 合計用に円グラフを更新する関数
+function updateGoalChartForTotal(balance, totalGoal) {
+    const percentage = totalGoal > 0 ? Math.min(100, Math.max(0, (balance / totalGoal) * 100)) : 0;
+
+    const chartData = {
+        labels: ['達成率', '未達成率'],
+        datasets: [{
+            data: [percentage, 100 - percentage],
+            backgroundColor: ['green', 'lightgrey']
+        }]
+    };
+
+    if (goalChart) {
+        goalChart.destroy();
+    }
+
+    goalChart = new Chart(goalChartCanvas, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+}
