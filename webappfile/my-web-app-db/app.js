@@ -133,13 +133,17 @@ console.log('dataMap[cellDateString]:', dataMap[cellDateString]);
 
 // 月間損益を計算する関数
 function calculateMonthlyBalance(year, month) {
+    if (currentCategory === 'total') {
+        // 合計の場合は何もしない（既に他で処理済み）
+        return;
+    }
     loadDataForMonth(currentCategory, currentDate, (dataForMonth) => {
         let totalProfit = 0;
         let totalExpense = 0;
 
         dataForMonth.forEach((entry) => {
-            totalProfit += entry.profit || 0;
-            totalExpense += entry.expense || 0;
+            totalProfit += parseFloat(entry.profit) || 0;
+            totalExpense += parseFloat(entry.expense) || 0;
         });
 
         const balance = totalProfit - totalExpense;
@@ -157,6 +161,10 @@ function calculateMonthlyBalance(year, month) {
 
 // 円グラフを更新する関数
 function updateGoalChart(balance, year, month) {
+    if (currentCategory === 'total') {
+        // 合計の場合は何もしない（既に他で処理済み）
+        return;
+    }
     getGoalForCategory(currentCategory, year, month, (goal) => {
         const percentage = goal > 0 ? Math.min(100, Math.max(0, (balance / goal) * 100)) : 0;
 
@@ -187,27 +195,34 @@ function updateGoalChart(balance, year, month) {
         });
     });
 }
-
 // 選択された日付のデータをロードする関数
 function loadDataForSelectedDate() {
     if (selectedDate) {
-        loadDataFromDatabase(currentCategory, selectedDate, (data) => {
-            if (data) {
-                profitInput.value = data.profit || 0;
-                expenseInput.value = data.expense || 0;
-                memoInput.value = data.memo || "";
-            } else {
-                profitInput.value = 0;
-                expenseInput.value = 0;
-                memoInput.value = "";
-            }
+        if (currentCategory === 'total') {
+            // 「合計」カテゴリでは入力欄をクリアする
+            profitInput.value = 0;
+            expenseInput.value = 0;
+            memoInput.value = "";
+            document.getElementById('memo-date').textContent = "";
+        } else {
+            loadDataFromDatabase(currentCategory, selectedDate, (data) => {
+                if (data) {
+                    profitInput.value = data.profit || 0;
+                    expenseInput.value = data.expense || 0;
+                    memoInput.value = data.memo || "";
+                } else {
+                    profitInput.value = 0;
+                    expenseInput.value = 0;
+                    memoInput.value = "";
+                }
 
-            const [yearStr, monthStr, dayStr] = selectedDate.split('-');
-            const dateObj = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, parseInt(dayStr, 10));
+                const [yearStr, monthStr, dayStr] = selectedDate.split('-');
+                const dateObj = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, parseInt(dayStr, 10));
 
-            const selectedDateText = dateObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('memo-date').textContent = selectedDateText;
-        });
+                const selectedDateText = dateObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('memo-date').textContent = selectedDateText;
+            });
+        }
     }
 }
 
@@ -261,9 +276,28 @@ memoSaveButton.addEventListener('click', () => {
 function displayGoalAmount() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1; // 月は1始まり
-    getGoalForCategory(currentCategory, year, month, (currentGoal) => {
-        document.getElementById('goal-display').textContent = `現在の目標金額: ${currentGoal}`;
-    });
+
+    if (currentCategory === 'total') {
+        // 合計の目標金額を表示
+        const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+        let totalGoal = 0;
+        let promises = categories.map(category => {
+            return new Promise((resolve) => {
+                getGoalForCategory(category, year, month, (goalAmount) => {
+                    totalGoal += goalAmount;
+                    resolve();
+                });
+            });
+        });
+        Promise.all(promises).then(() => {
+            document.getElementById('goal-display').textContent = `現在の合計目標金額: ${totalGoal}`;
+        });
+    } else {
+        // 単一のカテゴリの目標金額を表示
+        getGoalForCategory(currentCategory, year, month, (currentGoal) => {
+            document.getElementById('goal-display').textContent = `現在の目標金額: ${currentGoal}`;
+        });
+    }
 }
 
 // 目標金額の保存
@@ -301,7 +335,8 @@ function getGoalForCategory(category, year, month, callback) {
     fetch(`http://localhost:3000/api/getGoal?category=${encodeURIComponent(category)}&year=${year}&month=${month}`)
         .then(response => response.json())
         .then(goalAmount => {
-            callback(goalAmount);
+            const parsedGoal = parseFloat(goalAmount) || 0; // 文字列を数値に変換
+            callback(parsedGoal);
         })
         .catch(error => {
             console.error('目標金額の取得に失敗しました:', error);
@@ -380,19 +415,21 @@ document.addEventListener('DOMContentLoaded', function () {
     displayGoalAmount(); // 目標金額を表示
 });
 
-// プルダウンメニューの選択に応じてデータを切り替える
+// プルダウンで「合計」を選択したときに呼び出す処理を修正
 document.getElementById('category-select').addEventListener('change', function() {
     currentCategory = this.value; // 現在のカテゴリーを更新
-    
+
     if (currentCategory === 'total') {
-        // 「合計」が選択されている場合、データの入力と保存ボタンを無効化
+        // 「合計」が選択されている場合、入力と保存ボタンを無効化
         profitInput.disabled = true;
         expenseInput.disabled = true;
         saveButton.disabled = true;
         goalInput.disabled = true;
         goalSaveButton.disabled = true;
-        renderCalendarWithTotal(); // 合計のデータでカレンダーを表示
-        calculateTotalGoalAndUpdateChart(); // 合計用の円グラフを更新
+
+        // 合計を計算してカレンダーとグラフを更新
+        renderCalendarWithTotal();  // 合計データでカレンダーを描画
+        calculateTotalGoalAndUpdateChart(); // 合計目標金額と円グラフを更新
     } else {
         // 他のカテゴリが選択されている場合、入力と保存を有効化
         profitInput.disabled = false;
@@ -405,7 +442,6 @@ document.getElementById('category-select').addEventListener('change', function()
         displayGoalAmount();  // カテゴリに応じた目標金額を表示
     }
 });
-
 // 合計を計算してカレンダーに表示する関数
 function renderCalendarWithTotal() {
     const year = currentDate.getFullYear();
@@ -413,7 +449,9 @@ function renderCalendarWithTotal() {
     const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
 
     let totalDataMap = {};
+    let totalGoal = 0;  // 合計目標金額
 
+    // 各カテゴリのデータを取得するPromiseのリスト
     let fetchPromises = categories.map(category => {
         return new Promise((resolve) => {
             loadDataForMonth(category, currentDate, (dataForMonth) => {
@@ -428,18 +466,25 @@ function renderCalendarWithTotal() {
                     totalDataMap[formattedDate].profit += entry.profit || 0;
                     totalDataMap[formattedDate].expense += entry.expense || 0;
                 });
-                resolve();
+
+                // 各カテゴリの目標金額を取得して合計
+                getGoalForCategory(category, year, month, (goalAmount) => {
+                    totalGoal += goalAmount;
+                    resolve(); // カテゴリのデータ取得が完了
+                });
             });
         });
     });
 
+    // すべてのデータ取得が終わった後にカレンダーとグラフを更新
     Promise.all(fetchPromises).then(() => {
-        renderCalendarWithData(totalDataMap);
-        calculateMonthlyTotalBalance(totalDataMap);
+        renderCalendarWithData(totalDataMap);  // カレンダーを合計データで描画
+        calculateMonthlyTotalBalance(totalDataMap, totalGoal);  // 月間合計の損益と目標を計算
     });
 }
-// 月間合計収支を計算する関数
-function calculateMonthlyTotalBalance(dataMap) {
+
+// 月間合計収支を計算し、目標金額に基づいて円グラフを更新する関数
+function calculateMonthlyTotalBalance(dataMap, totalGoal) {
     let totalProfit = 0;
     let totalExpense = 0;
 
@@ -456,7 +501,11 @@ function calculateMonthlyTotalBalance(dataMap) {
     } else {
         monthlyBalanceDiv.style.color = 'red';
     }
+
+    // 合計金額に基づいて円グラフを更新
+    updateGoalChartForTotal(balance, totalGoal);  // グラフを合計用に更新
 }
+
 
 // データを基にカレンダーを描画する関数
 function renderCalendarWithData(dataMap) {
@@ -534,13 +583,25 @@ function renderCalendarWithData(dataMap) {
 
 prevMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar(currentDate);
+    if (currentCategory === 'total') {
+        renderCalendarWithTotal();
+        calculateTotalGoalAndUpdateChart();
+    } else {
+        renderCalendar(currentDate);
+        calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
+    }
     displayGoalAmount(); // 月が変わったら目標金額を更新
 });
 
 nextMonthButton.addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar(currentDate);
+    if (currentCategory === 'total') {
+        renderCalendarWithTotal();
+        calculateTotalGoalAndUpdateChart();
+    } else {
+        renderCalendar(currentDate);
+        calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
+    }
     displayGoalAmount(); // 月が変わったら目標金額を更新
 });
 
@@ -552,37 +613,65 @@ function calculateTotalGoalAndUpdateChart() {
     const month = currentDate.getMonth() + 1;
     const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
 
-    let totalGoal = 0;
-    let fetchPromises = categories.map(category => {
+    let totalGoal = 0;  // 合計目標金額
+    let totalProfit = 0;  // 合計収益
+    let totalExpense = 0;  // 合計支出
+
+    // 各カテゴリのデータを取得するPromiseのリスト
+    let goalPromises = categories.map(category => {
         return new Promise((resolve) => {
             getGoalForCategory(category, year, month, (goalAmount) => {
-                totalGoal += goalAmount;
+                totalGoal += goalAmount;  // 各カテゴリの目標金額を合計
                 resolve();
             });
         });
     });
 
-    Promise.all(fetchPromises).then(() => {
-        calculateCurrentBalanceForMonth(year, month, (totalBalance) => {
-            updateGoalChartForTotal(totalBalance, totalGoal); // グラフを合計用に更新
+    let dataPromises = categories.map(category => {
+        return new Promise((resolve) => {
+            loadDataForMonth(category, currentDate, (dataForMonth) => {
+                dataForMonth.forEach((entry) => {
+                    totalProfit += parseFloat(entry.profit) || 0;
+                    totalExpense += parseFloat(entry.expense) || 0;
+                });
+                resolve();
+            });
         });
     });
+
+    // すべてのデータ取得が完了した後にグラフを更新
+    Promise.all([...goalPromises, ...dataPromises]).then(() => {
+        displayTotalGoalAmount(totalGoal);  // 合計目標金額を表示
+
+        const balance = totalProfit - totalExpense;  // 収益と支出の差額を計算
+        updateGoalChartForTotal(balance, totalGoal);  // 合計用の円グラフを更新
+
+        // 月間損益を表示
+        monthlyBalanceDiv.textContent = `月間損益: ${balance}`;
+        monthlyBalanceDiv.style.color = balance >= 0 ? 'green' : 'red';
+    });
+}
+
+// 合計目標金額を表示する関数
+function displayTotalGoalAmount(totalGoal) {
+    document.getElementById('goal-display').textContent = `現在の合計目標金額: ${totalGoal}`;
 }
 
 // 合計用に円グラフを更新する関数
 function updateGoalChartForTotal(balance, totalGoal) {
+    // 目標金額に対する達成率を計算
     const percentage = totalGoal > 0 ? Math.min(100, Math.max(0, (balance / totalGoal) * 100)) : 0;
 
     const chartData = {
         labels: ['達成率', '未達成率'],
         datasets: [{
             data: [percentage, 100 - percentage],
-            backgroundColor: ['green', 'lightgrey']
+            backgroundColor: ['green', 'lightgrey']  // 達成率は緑、未達成率は灰色で表示
         }]
     };
 
     if (goalChart) {
-        goalChart.destroy();
+        goalChart.destroy();  // 既存のチャートを破棄
     }
 
     goalChart = new Chart(goalChartCanvas, {
