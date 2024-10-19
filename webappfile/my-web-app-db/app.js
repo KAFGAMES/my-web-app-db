@@ -161,18 +161,22 @@ function calculateMonthlyBalance(year, month) {
 
 // 円グラフを更新する関数
 function updateGoalChart(balance, year, month) {
-    if (currentCategory === 'total') {
-        // 合計の場合は何もしない（既に他で処理済み）
-        return;
-    }
     getGoalForCategory(currentCategory, year, month, (goal) => {
-        const percentage = goal > 0 ? Math.min(100, Math.max(0, (balance / goal) * 100)) : 0;
+        let percentage;
+
+        if (goal < 0) {
+            // 目標がマイナスの場合の達成率
+            percentage = Math.min(100, Math.max(0, (balance / goal) * 100));
+        } else {
+            // 目標がプラスの場合の達成率
+            percentage = Math.min(100, Math.max(0, (balance / goal) * 100));
+        }
 
         const chartData = {
             labels: ['達成率', '未達成率'],
             datasets: [{
                 data: [percentage, 100 - percentage],
-                backgroundColor: ['green', 'lightgrey']
+                backgroundColor: goal < 0 ? ['red', 'lightgrey'] : ['green', 'lightgrey']
             }]
         };
 
@@ -302,15 +306,15 @@ function displayGoalAmount() {
 
 // 目標金額の保存
 goalSaveButton.addEventListener('click', () => {
-    const goalAmount = parseInt(goalInput.value, 10) || 0; // 変数名を goalAmount に修正
+    const goalAmount = parseInt(goalInput.value, 10) || 0;
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1; // 月は1始まり
-    saveGoalToDatabase(currentCategory, year, month, goalAmount);
-    displayGoalAmount();  // 目標金額を更新して表示
+    const month = currentDate.getMonth() + 1;
 
-    // 目標達成率のグラフを更新するために、現在の収支（balance）を計算
-    calculateCurrentBalanceForMonth(year, month, (balance) => {
-        updateGoalChart(balance, year, month);  // グラフを再描画
+    saveGoalToDatabase(currentCategory, year, month, goalAmount, () => {
+        displayGoalAmount(); // 目標金額を更新して表示
+        calculateCurrentBalanceForMonth(year, month, (balance) => {
+            updateGoalChart(balance, year, month);  // グラフを再描画
+        });
     });
 });
 
@@ -391,7 +395,8 @@ function loadDataForMonth(category, date, callback) {
         });
 }
 
-function saveGoalToDatabase(category, year, month, goalAmount) {
+// 目標金額の保存関数にコールバックを追加
+function saveGoalToDatabase(category, year, month, goalAmount, callback) {
     fetch('http://localhost:3000/api/saveGoal', {
         method: 'POST',
         headers: {
@@ -402,6 +407,7 @@ function saveGoalToDatabase(category, year, month, goalAmount) {
     .then(response => response.json())
     .then(data => {
         console.log('目標金額が保存されました:', data);
+        if (callback) callback(); // コールバックで目標金額表示を更新
     })
     .catch(error => {
         console.error('目標金額の保存に失敗しました:', error);
