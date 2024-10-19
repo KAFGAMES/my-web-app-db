@@ -194,11 +194,23 @@ function updateGoalChart(balance, year, month) {
             percentage = Math.min(100, Math.max(0, (balance / goal) * 100));
         }
 
+        let backgroundColor;
+        if (goal > 0 && balance >= 0) {
+            // 目標金額が正で収支も正の場合は緑
+            backgroundColor = ['green', 'lightgrey'];
+        } else if (goal < 0 && balance <= 0) {
+            // 目標金額が負で収支も負の場合は赤
+            backgroundColor = ['red', 'lightgrey'];
+        } else {
+            // その他の場合は灰色
+            backgroundColor = ['grey', 'lightgrey'];
+        }
+
         const chartData = {
             labels: ['達成率', '未達成率'],
             datasets: [{
                 data: [percentage, 100 - percentage],
-                backgroundColor: percentage >= 100 ? ['green', 'lightgrey'] : ['red', 'lightgrey']
+                backgroundColor: backgroundColor
             }]
         };
 
@@ -445,19 +457,35 @@ deleteMemoButton.addEventListener('click', () => {
 
 // カテゴリや日付が変更されたときの処理
 document.getElementById('category-select').addEventListener('change', function() {
-    currentCategory = this.value; // 現在のカテゴリーを更新
+    currentCategory = this.value;
 
     if (currentCategory === 'total') {
-        // 「合計」が選択されている場合、入力と保存ボタンを無効化
+        // 入力とボタンを無効化
         profitInput.disabled = true;
         expenseInput.disabled = true;
         saveButton.disabled = true;
         goalInput.disabled = true;
         goalSaveButton.disabled = true;
-        memoInput.disabled = true; // メモも無効化
+        memoInput.disabled = true;
         memoSaveButton.disabled = true;
+        document.getElementById('add-profit-detail-btn').disabled = true;
+        document.getElementById('add-expense-detail-btn').disabled = true;
+
+        // 入力欄をクリア
+        profitInput.value = '';
+        expenseInput.value = '';
+        memoInput.value = '';
+        profitDetails = [];
+        expenseDetails = [];
+        updateProfitDetailsList();
+        updateExpenseDetailsList();
+
+        // カレンダーとグラフを更新
+        renderCalendarWithTotal();
+        calculateTotalGoalAndUpdateChart();
+        displayGoalAmount();
     } else {
-        // 他のカテゴリが選択されている場合、入力と保存を有効化
+        // 入力とボタンを有効化
         profitInput.disabled = false;
         expenseInput.disabled = false;
         saveButton.disabled = false;
@@ -465,18 +493,15 @@ document.getElementById('category-select').addEventListener('change', function()
         goalSaveButton.disabled = false;
         memoInput.disabled = false;
         memoSaveButton.disabled = false;
-    }
-    loadDataForSelectedDate(); // 選択された日付のデータをロード
-    if (currentCategory === 'total') {
-        renderCalendarWithTotal();
-        calculateTotalGoalAndUpdateChart();
-    } else {
+        document.getElementById('add-profit-detail-btn').disabled = false;
+        document.getElementById('add-expense-detail-btn').disabled = false;
+
+        loadDataForSelectedDate();
         renderCalendar(currentDate);
         calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
         displayGoalAmount();
     }
 });
-
 // カレンダーのデータをデータベースに保存する関数
 function saveDataToDatabase(category, date, profit, expense, memo, profitDetails, expenseDetails, callback) {
     fetch('http://localhost:3000/api/saveData', {
@@ -536,18 +561,20 @@ function displayGoalAmount() {
         let promises = categories.map(category => {
             return new Promise((resolve) => {
                 getGoalForCategory(category, year, month, (goalAmount) => {
-                    totalGoal += goalAmount;
+                    totalGoal += parseFloat(goalAmount) || 0;
                     resolve();
                 });
             });
         });
         Promise.all(promises).then(() => {
             goalDisplay.textContent = `現在の合計目標金額: ${totalGoal}`;
+            goalInput.value = ''; // 入力欄をクリア
         });
     } else {
         // 単一のカテゴリの目標金額を表示
         getGoalForCategory(currentCategory, year, month, (currentGoal) => {
             goalDisplay.textContent = `現在の目標金額: ${currentGoal}`;
+            goalInput.value = currentGoal; // 入力欄を更新
         });
     }
 }
@@ -775,22 +802,18 @@ function calculateTotalGoalAndUpdateChart() {
     const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
     let totalGoal = 0;
     let totalBalance = 0;
-    let goalPromises = [];
-    let balancePromises = [];
 
-    // 目標金額を取得
-    categories.forEach(category => {
-        goalPromises.push(new Promise((resolve) => {
+    let goalPromises = categories.map(category => {
+        return new Promise((resolve) => {
             getGoalForCategory(category, year, month, (goalAmount) => {
-                totalGoal += goalAmount;
+                totalGoal += parseFloat(goalAmount) || 0;
                 resolve();
             });
-        }));
+        });
     });
 
-    // 各カテゴリの収支を取得
-    categories.forEach(category => {
-        balancePromises.push(new Promise((resolve) => {
+    let balancePromises = categories.map(category => {
+        return new Promise((resolve) => {
             loadDataForMonth(category, currentDate, (dataForMonth) => {
                 let categoryProfit = 0;
                 let categoryExpense = 0;
@@ -798,24 +821,32 @@ function calculateTotalGoalAndUpdateChart() {
                     categoryProfit += parseFloat(entry.profit) || 0;
                     categoryExpense += parseFloat(entry.expense) || 0;
                 });
-                totalBalance += (categoryProfit - categoryExpense);
+                totalBalance += categoryProfit - categoryExpense;
                 resolve();
             });
-        }));
+        });
     });
 
-    Promise.all(goalPromises.concat(balancePromises)).then(() => {
+    Promise.all([...goalPromises, ...balancePromises]).then(() => {
         let percentage = 0;
-
         if (totalGoal !== 0) {
             percentage = Math.min(100, Math.max(0, (totalBalance / totalGoal) * 100));
+        }
+
+        let backgroundColor;
+        if (totalGoal > 0 && totalBalance >= 0) {
+            backgroundColor = ['green', 'lightgrey'];
+        } else if (totalGoal < 0 && totalBalance <= 0) {
+            backgroundColor = ['red', 'lightgrey'];
+        } else {
+            backgroundColor = ['grey', 'lightgrey'];
         }
 
         const chartData = {
             labels: ['達成率', '未達成率'],
             datasets: [{
                 data: [percentage, 100 - percentage],
-                backgroundColor: percentage >= 100 ? ['green', 'lightgrey'] : ['red', 'lightgrey']
+                backgroundColor: backgroundColor
             }]
         };
 

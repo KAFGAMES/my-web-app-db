@@ -62,7 +62,14 @@ app.post('/api/deleteData', (req, res) => {
         return;
     }
 
-    let setClause = fields.map(field => `${field} = NULL`).join(', ');
+    let setClause = fields.map(field => {
+        if (field === 'profit' || field === 'expense') {
+            return `${field} = 0`;
+        } else {
+            return `${field} = NULL`;
+        }
+    }).join(', ');
+    
 
     const query = `UPDATE calendar_data SET ${setClause} WHERE category = ? AND date = ?`;
 
