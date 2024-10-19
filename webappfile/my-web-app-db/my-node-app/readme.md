@@ -25,6 +25,8 @@ mysql -u root -p
 DROP TABLE IF EXISTS calendar_data;
 DROP TABLE IF EXISTS monthly_goals;
 DROP TABLE IF EXISTS users;
+ALTER TABLE calendar_data ADD COLUMN profit_details TEXT;
+ALTER TABLE calendar_data ADD COLUMN expense_details TEXT;
 Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p KAFGAMES
 
 node my-node-app/server.js

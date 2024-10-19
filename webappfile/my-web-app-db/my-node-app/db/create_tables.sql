@@ -23,3 +23,21 @@ CREATE TABLE users (
     password VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 利益詳細を保存するテーブル
+CREATE TABLE profit_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category VARCHAR(255),
+    date DATE,
+    amount INT,
+    description VARCHAR(255)
+);
+
+-- 支出詳細を保存するテーブル
+CREATE TABLE expense_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category VARCHAR(255),
+    date DATE,
+    amount INT,
+    description VARCHAR(255)
+);

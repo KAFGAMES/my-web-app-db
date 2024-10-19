@@ -21,7 +21,7 @@
                 <option value="taxes">税金</option>
                 <option value="business">経費</option>
                 <option value="leisure">娯楽費</option>
-                <option value="total">合計</option> <!-- 合計オプションを追加 -->
+                <option value="total">合計</option>
             </select>
         </div>
     </div>
@@ -30,10 +30,47 @@
         <!-- 左側: 利益と支出の入力欄 -->
         <div class="input-panel">
             <h3>利益と支出を入力</h3>
-            <label for="profit-input"><span class="profit-label">利益:</span></label>
-            <input type="number" id="profit-input" placeholder="利益額を入力">
-            <label for="expense-input"><span class="expense-label">支出:</span></label>
-            <input type="number" id="expense-input" placeholder="支出額を入力">
+
+            <!-- 利益の入力欄と削除ボタンを囲むdivを追加 -->
+            <div class="input-with-delete">
+                <label for="profit-input"><span class="profit-label">利益:</span></label>
+                <input type="number" id="profit-input" placeholder="利益額を入力" readonly>
+                <!-- 利益の削除ボタンを追加 -->
+                <button class="delete-btn" id="delete-profit-btn">×</button>
+            </div>
+            <button id="add-profit-detail-btn">+ 利益詳細</button>
+            <!-- 利益詳細のモーダル -->
+            <div id="profit-detail-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>利益の詳細を入力</h3>
+                    <input type="number" id="profit-detail-amount" placeholder="金額">
+                    <input type="text" id="profit-detail-description" placeholder="内容">
+                    <button id="save-profit-detail-btn">保存</button>
+                </div>
+            </div>
+            <div id="profit-details-list" class="details-list"></div> <!-- 利益の詳細リストの表示エリア -->
+
+            <!-- 支出の入力欄と削除ボタンを囲むdivを追加 -->
+            <div class="input-with-delete">
+                <label for="expense-input"><span class="expense-label">支出:</span></label>
+                <input type="number" id="expense-input" placeholder="支出額を入力" readonly>
+                <!-- 支出の削除ボタンを追加 -->
+                <button class="delete-btn" id="delete-expense-btn">×</button>
+            </div>
+            <button id="add-expense-detail-btn">+ 支出詳細</button>
+            <!-- 支出詳細のモーダル -->
+            <div id="expense-detail-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>支出の詳細を入力</h3>
+                    <input type="number" id="expense-detail-amount" placeholder="金額">
+                    <input type="text" id="expense-detail-description" placeholder="内容">
+                    <button id="save-expense-detail-btn">保存</button>
+                </div>
+            </div>
+            <div id="expense-details-list" class="details-list"></div> <!-- 支出の詳細リストの表示エリア -->
+
             <button id="save-btn">保存</button>
         </div>
 
@@ -73,8 +110,14 @@
         </div>
     </div>
 
+    <!-- メモパネル -->
     <div class="memo-panel">
-        <div id="memo-date" style="font-weight: bold; margin-bottom: 10px;"></div> <!-- 日付を表示する場所 -->
+        <!-- 日付とメモ削除ボタンを横並びにする -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="memo-date" style="font-weight: bold; margin-bottom: 10px;"></div> <!-- 日付を表示する場所 -->
+            <!-- メモの削除ボタンを追加 -->
+            <button id="delete-memo-btn" class="delete-btn">×</button>
+        </div>
         <textarea id="memo-input" rows="15" placeholder="選んだ日付のメモをここに入力..."></textarea>
         <button id="memo-save-btn">メモを保存</button>
     </div>
