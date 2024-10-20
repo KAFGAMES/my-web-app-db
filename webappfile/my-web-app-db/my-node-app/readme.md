@@ -34,3 +34,12 @@ node my-node-app/server.js
 
 
 http://localhost:3306/
+
+
+ローカルの競合を破棄して、最新状態に変更コード
+
+git reset --merge
+git reset --hard
+
+git fetch origin main
+git reset --hard origin/main

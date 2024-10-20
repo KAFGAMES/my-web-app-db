@@ -122,6 +122,9 @@ function renderCalendar(date) {
                     if (dataMap[cellDateString]) {
                         const entry = dataMap[cellDateString];
 
+                        // 利益と支出が0円の場合は表示しない
+    if (entry.profit !== 0 || entry.expense !== 0) {
+
                         const profitDiv = document.createElement('div');
                         profitDiv.classList.add('profit');
                         profitDiv.textContent = `利益: ${entry.profit}`;
@@ -133,6 +136,7 @@ function renderCalendar(date) {
                         cell.appendChild(profitDiv);
                         cell.appendChild(expenseDiv);
                     }
+                }
 
                     cell.addEventListener('click', () => {
                         // 既に選択されている日付から .selected クラスを削除
@@ -750,6 +754,9 @@ function renderCalendarWithTotal() {
                     if (dataMap[cellDateString]) {
                         const entry = dataMap[cellDateString];
 
+                        // 利益と支出が0円の場合は表示しない
+    if (entry.profit !== 0 || entry.expense !== 0) {
+
                         const profitDiv = document.createElement('div');
                         profitDiv.classList.add('profit');
                         profitDiv.textContent = `利益: ${entry.profit}`;
@@ -761,6 +768,7 @@ function renderCalendarWithTotal() {
                         cell.appendChild(profitDiv);
                         cell.appendChild(expenseDiv);
                     }
+                }
 
                     dateCount++;
                 }
