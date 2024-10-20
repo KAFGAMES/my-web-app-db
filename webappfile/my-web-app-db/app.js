@@ -1,5 +1,3 @@
-// app.js
-
 const calendarBody = document.getElementById('calendar-body');
 const monthYear = document.getElementById('month-year');
 const prevMonthButton = document.getElementById('prev-month');
@@ -123,20 +121,20 @@ function renderCalendar(date) {
                         const entry = dataMap[cellDateString];
 
                         // 利益と支出が0円の場合は表示しない
-    if (entry.profit !== 0 || entry.expense !== 0) {
+                        if (entry.profit !== 0 || entry.expense !== 0) {
 
-                        const profitDiv = document.createElement('div');
-                        profitDiv.classList.add('profit');
-                        profitDiv.textContent = `利益: ${entry.profit}`;
+                            const profitDiv = document.createElement('div');
+                            profitDiv.classList.add('profit');
+                            profitDiv.textContent = `利益: ${entry.profit}`;
 
-                        const expenseDiv = document.createElement('div');
-                        expenseDiv.classList.add('expense');
-                        expenseDiv.textContent = `支出: ${entry.expense}`;
+                            const expenseDiv = document.createElement('div');
+                            expenseDiv.classList.add('expense');
+                            expenseDiv.textContent = `支出: ${entry.expense}`;
 
-                        cell.appendChild(profitDiv);
-                        cell.appendChild(expenseDiv);
+                            cell.appendChild(profitDiv);
+                            cell.appendChild(expenseDiv);
+                        }
                     }
-                }
 
                     cell.addEventListener('click', () => {
                         // 既に選択されている日付から .selected クラスを削除
@@ -505,7 +503,16 @@ document.getElementById('category-select').addEventListener('change', function()
         calculateMonthlyBalance(currentDate.getFullYear(), currentDate.getMonth());
         displayGoalAmount();
     }
+
+    // メモページが表示されている場合、カテゴリ変更に応じてメモを再ロード
+    if (document.getElementById('memo-page').style.display === 'block') {
+        const categorySelect = document.getElementById('category-select');
+        const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
+        document.getElementById('memo-category-name').textContent = categoryName;
+        loadCategoryMemo();
+    }
 });
+
 // カレンダーのデータをデータベースに保存する関数
 function saveDataToDatabase(category, date, profit, expense, memo, profitDetails, expenseDetails, callback) {
     fetch('http://localhost:3000/api/saveData', {
@@ -755,20 +762,20 @@ function renderCalendarWithTotal() {
                         const entry = dataMap[cellDateString];
 
                         // 利益と支出が0円の場合は表示しない
-    if (entry.profit !== 0 || entry.expense !== 0) {
+                        if (entry.profit !== 0 || entry.expense !== 0) {
 
-                        const profitDiv = document.createElement('div');
-                        profitDiv.classList.add('profit');
-                        profitDiv.textContent = `利益: ${entry.profit}`;
+                            const profitDiv = document.createElement('div');
+                            profitDiv.classList.add('profit');
+                            profitDiv.textContent = `利益: ${entry.profit}`;
 
-                        const expenseDiv = document.createElement('div');
-                        expenseDiv.classList.add('expense');
-                        expenseDiv.textContent = `支出: ${entry.expense}`;
+                            const expenseDiv = document.createElement('div');
+                            expenseDiv.classList.add('expense');
+                            expenseDiv.textContent = `支出: ${entry.expense}`;
 
-                        cell.appendChild(profitDiv);
-                        cell.appendChild(expenseDiv);
+                            cell.appendChild(profitDiv);
+                            cell.appendChild(expenseDiv);
+                        }
                     }
-                }
 
                     dateCount++;
                 }
@@ -880,3 +887,69 @@ function calculateTotalGoalAndUpdateChart() {
         goalDisplay.textContent = `現在の合計目標金額: ${totalGoal}`;
     });
 }
+
+// メモボタンの取得
+const memoMenuButton = document.getElementById('memo-menu-btn');
+
+// メモボタンのクリックイベント
+memoMenuButton.addEventListener('click', () => {
+    showMemoPage();
+});
+
+// メモページを表示する関数
+function showMemoPage() {
+    // メインコンテンツを非表示
+    document.getElementById('main-content').style.display = 'none';
+    // メモページを表示
+    document.getElementById('memo-page').style.display = 'block';
+
+    // 現在選択されているカテゴリ名を表示
+    const categorySelect = document.getElementById('category-select');
+    const categoryName = categorySelect.options[categorySelect.selectedIndex].text;
+    document.getElementById('memo-category-name').textContent = categoryName;
+
+    // 選択されているカテゴリのメモをロード
+    loadCategoryMemo();
+}
+
+// 戻るボタンのイベントリスナー
+document.getElementById('category-memo-back-btn').addEventListener('click', () => {
+    // メモページを非表示
+    document.getElementById('memo-page').style.display = 'none';
+    // メインコンテンツを表示
+    document.getElementById('main-content').style.display = 'block';
+});
+
+// カテゴリのメモをロード
+function loadCategoryMemo() {
+    const category = document.getElementById('category-select').value;
+
+    fetch(`http://localhost:3000/api/getCategoryMemo?category=${encodeURIComponent(category)}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('category-memo-input').value = data.memo || '';
+        })
+        .catch(error => {
+            console.error('カテゴリメモの取得に失敗しました:', error);
+            document.getElementById('category-memo-input').value = '';
+        });
+}
+
+// メモを保存
+document.getElementById('category-memo-save-btn').addEventListener('click', () => {
+    const category = document.getElementById('category-select').value;
+    const memo = document.getElementById('category-memo-input').value;
+
+    fetch('http://localhost:3000/api/saveCategoryMemo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, memo })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('メモが保存されました');
+    })
+    .catch(error => {
+        console.error('メモの保存に失敗しました:', error);
+    });
+});

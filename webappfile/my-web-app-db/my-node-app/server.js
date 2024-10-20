@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -11,7 +9,7 @@ app.use(cors()); // 全てのオリジンからのリクエストを許可
 const connection = mysql.createConnection({
     host: 'localhost',  
     user: 'root',  
-    password: '0515masa',  
+    password: '0515masa',  // パスワードはご自身の設定に合わせてください
     database: 'KAFGAMES',  
     port: '3306'
 });
@@ -123,6 +121,34 @@ app.get('/api/getDataForMonth', (req, res) => {
             return;
         }
         res.json(results);
+    });
+});
+
+// カテゴリメモを保存するAPI
+app.post('/api/saveCategoryMemo', (req, res) => {
+    const { category, memo } = req.body;
+    const query = 'INSERT INTO category_memos (category, memo) VALUES (?, ?) ON DUPLICATE KEY UPDATE memo = VALUES(memo)';
+    connection.query(query, [category, memo], (err, results) => {
+        if (err) {
+            console.error('カテゴリメモの保存に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリメモの保存に失敗しました' });
+            return;
+        }
+        res.json({ message: 'カテゴリメモが保存されました' });
+    });
+});
+
+// カテゴリメモを取得するAPI
+app.get('/api/getCategoryMemo', (req, res) => {
+    const { category } = req.query;
+    const query = 'SELECT memo FROM category_memos WHERE category = ?';
+    connection.query(query, [category], (err, results) => {
+        if (err) {
+            console.error('カテゴリメモの取得に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリメモの取得に失敗しました' });
+            return;
+        }
+        res.json({ memo: results[0]?.memo || '' });
     });
 });
 
