@@ -12,6 +12,14 @@ const goalInput = document.getElementById('goal-input');
 const goalSaveButton = document.getElementById('goal-save-btn');
 const goalChartCanvas = document.getElementById('goal-chart');
 const goalDisplay = document.getElementById('goal-display');
+// 「日記家計簿」ボタンのクリックイベント
+const diaryLedgerButton = document.getElementById('diary-ledger-btn');
+diaryLedgerButton.addEventListener('click', () => {
+    // メモページを非表示にしてメインコンテンツを表示
+    document.getElementById('memo-page').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+});
+
 
 let currentDate = new Date();
 let selectedDate = null;
