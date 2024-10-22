@@ -15,8 +15,9 @@ const goalDisplay = document.getElementById('goal-display');
 // 「日記家計簿」ボタンのクリックイベント
 const diaryLedgerButton = document.getElementById('diary-ledger-btn');
 diaryLedgerButton.addEventListener('click', () => {
-    // メモページを非表示にしてメインコンテンツを表示
+    // 他のページを非表示にする
     document.getElementById('memo-page').style.display = 'none';
+    document.getElementById('category-management-page').style.display = 'none'; // 追加
     document.getElementById('main-content').style.display = 'block';
 });
 
@@ -54,11 +55,72 @@ document.querySelectorAll('.close').forEach(closeBtn => {
     });
 });
 
+// カテゴリ管理ページを開くボタンのイベントリスナー
+document.getElementById('category-management-btn').addEventListener('click', showCategoryManagementPage);
+
+// カテゴリ管理ページの戻るボタンのイベントリスナー
+document.getElementById('category-management-back-btn').addEventListener('click', () => {
+    document.getElementById('category-management-page').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block'; // 修正
+});
+
+// 新しいカテゴリを追加するイベントリスナーを追加
+//document.getElementById('add-category-btn').addEventListener('click', () => {
+//    const newCategoryName = prompt('新しいカテゴリ名を入力してください:');
+ //   if (newCategoryName) {
+  //      const categorySelect = document.getElementById('category-select');
+  //      const newOption = document.createElement('option');
+   //     newOption.value = newCategoryName.toLowerCase(); // 必要に応じて値を加工
+   //     newOption.text = newCategoryName;
+   //     categorySelect.add(newOption);
+   //     loadCategories(); // カテゴリ一覧を再読み込み
+  //  }
+//});
+
+
+// タブ切り替えボタンのイベントリスナー
+//document.getElementById('category-management-tab-btn').addEventListener('click', showCategoryManagementPage);
+//document.getElementById('memo-tab-btn').addEventListener('click', showMemoPage);
+
 // 既存の変数定義の後に削除ボタンの要素を取得
 const deleteProfitButton = document.getElementById('delete-profit-btn');
 const deleteExpenseButton = document.getElementById('delete-expense-btn');
 const deleteMemoButton = document.getElementById('delete-memo-btn');
 
+// プルダウンメニューの表示を変更する関数
+function loadCategories() {
+    const categorySelect = document.getElementById('category-select');
+    const categories = Array.from(categorySelect.options).map(option => option.value);
+    const categoryListDiv = document.getElementById('category-list');
+    categoryListDiv.innerHTML = '';
+
+    categories.forEach((category, index) => {
+        const categoryDiv = document.createElement('div');
+        const categoryName = categorySelect.options[index].text;
+        categoryDiv.textContent = categoryName;
+
+        // 名前変更ボタンを追加
+        const editButton = document.createElement('button');
+        editButton.textContent = '名前変更';
+        editButton.addEventListener('click', () => {
+            const newName = prompt(`新しいカテゴリ名を入力してください: ${categoryName}`);
+            if (newName) {
+                categorySelect.options[index].text = newName; // プルダウンの表示を更新
+                loadCategories(); // 一覧を再ロード
+            }
+        });
+
+        categoryDiv.appendChild(editButton);
+        categoryListDiv.appendChild(categoryDiv);
+    });
+}
+// カテゴリ管理ページを開く関数
+function showCategoryManagementPage() {
+    document.getElementById('main-content').style.display = 'none'; // 追加
+    document.getElementById('memo-page').style.display = 'none';
+    document.getElementById('category-management-page').style.display = 'block';
+    loadCategories();
+}
 // 今日の日付を選択状態にする関数
 function selectToday() {
     const today = new Date();
@@ -908,6 +970,7 @@ memoMenuButton.addEventListener('click', () => {
 function showMemoPage() {
     // メインコンテンツを非表示
     document.getElementById('main-content').style.display = 'none';
+    document.getElementById('category-management-page').style.display = 'none';
     // メモページを表示
     document.getElementById('memo-page').style.display = 'block';
 

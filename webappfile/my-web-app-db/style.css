@@ -264,3 +264,50 @@ body {
     margin: 5px;
     padding: 10px 20px;
 }
+
+#category-management-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+#category-list div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f4f4f4;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.tabs button.active {
+    background-color: #ddd;
+}
