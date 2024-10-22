@@ -113,14 +113,19 @@ body {
 }
 
 .menu-bar {
-    position: relative;
+    position: fixed; /* メニューバーを固定 */
+    top: 0; /* 上部に配置 */
+    left: 0; /* 左端に配置 */
     width: 100%;
+    z-index: 1000; /* 他の要素より前に表示 */
     background-color: #333;
     color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 5px 10px; /* 上下のパディングを小さくする */
+    height: 40px; /* 高さを40pxに設定 */
+    font-size: 14px; /* フォントサイズを小さくする */
 }
 
 .menu-right {
@@ -243,6 +248,7 @@ body {
 
 #memo-page h2 {
     text-align: center;
+    margin-top: 60px; /* 上部に余白を追加してタイトルを下にずらす */
     margin-bottom: 20px;
 }
 
