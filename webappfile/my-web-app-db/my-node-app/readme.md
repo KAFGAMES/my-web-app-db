@@ -28,6 +28,9 @@ DROP TABLE IF EXISTS users;
 ALTER TABLE calendar_data ADD COLUMN profit_details TEXT;
 ALTER TABLE calendar_data ADD COLUMN expense_details TEXT;
 Get-Content -Path "my-node-app/db/create_tables.sql" | mysql -u root -p KAFGAMES
+cmd /c "mysql -u root -p --default-character-set=utf8mb4 KAFGAMES < my-node-app/db/create_table_category.sql"
+
+
 
 node my-node-app/server.js
 

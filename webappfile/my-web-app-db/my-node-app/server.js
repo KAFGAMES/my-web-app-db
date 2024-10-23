@@ -152,6 +152,142 @@ app.get('/api/getCategoryMemo', (req, res) => {
     });
 });
 
+
+// カテゴリテーブルの作成（初回のみ実行）
+connection.query(`
+    CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        position INT NOT NULL
+    )
+`, (err) => {
+    if (err) {
+        console.error('カテゴリテーブルの作成に失敗しました:', err);
+    } else {
+        console.log('カテゴリテーブルが存在します');
+    }
+});
+
+// カテゴリを取得するAPI
+app.get('/api/getCategories', (req, res) => {
+    const query = 'SELECT * FROM categories ORDER BY position';
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('カテゴリの取得に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリの取得に失敗しました' });
+            return;
+        }
+        res.json(results);
+    });
+});
+
+// カテゴリ名を更新するAPI
+app.post('/api/updateCategoryName', (req, res) => {
+    const { id, name } = req.body;
+
+    // 古いカテゴリ名を取得
+    const getCategoryQuery = 'SELECT name FROM categories WHERE id = ?';
+    connection.query(getCategoryQuery, [id], (err, results) => {
+        if (err) {
+            console.error('カテゴリ名の取得に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリ名の取得に失敗しました' });
+            return;
+        }
+
+        const oldName = results[0].name;
+
+        // カテゴリ名を更新
+        const updateCategoryQuery = 'UPDATE categories SET name = ? WHERE id = ?';
+        connection.query(updateCategoryQuery, [name, id], (err) => {
+            if (err) {
+                console.error('カテゴリ名の更新に失敗しました:', err);
+                res.status(500).json({ error: 'カテゴリ名の更新に失敗しました' });
+                return;
+            }
+
+            // 関連するデータのカテゴリ名を更新
+            const updateDataQuery = 'UPDATE calendar_data SET category = ? WHERE category = ?';
+            connection.query(updateDataQuery, [name, oldName], (err) => {
+                if (err) {
+                    console.error('関連データのカテゴリ名の更新に失敗しました:', err);
+                    res.status(500).json({ error: '関連データのカテゴリ名の更新に失敗しました' });
+                    return;
+                }
+
+                res.json({ message: 'カテゴリ名と関連データが更新されました' });
+            });
+        });
+    });
+});
+
+// カテゴリの順番を更新するAPI
+app.post('/api/updateCategoryOrder', (req, res) => {
+    const categories = req.body.categories; // [{id: 1, position: 1}, ...]
+    const queries = categories.map(cat => {
+        return new Promise((resolve, reject) => {
+            const query = 'UPDATE categories SET position = ? WHERE id = ?';
+            connection.query(query, [cat.position, cat.id], (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    });
+
+    Promise.all(queries)
+        .then(() => {
+            res.json({ message: 'カテゴリの順番が更新されました' });
+        })
+        .catch(err => {
+            console.error('カテゴリの順番の更新に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリの順番の更新に失敗しました' });
+        });
+});
+
+// 新しいカテゴリを追加するAPI
+app.post('/api/addCategory', (req, res) => {
+    const { name } = req.body;
+    // 新しいカテゴリのpositionを最大値+1に設定
+    const getMaxPositionQuery = 'SELECT MAX(position) as maxPosition FROM categories';
+    connection.query(getMaxPositionQuery, (err, results) => {
+        if (err) {
+            console.error('最大位置の取得に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリの追加に失敗しました' });
+            return;
+        }
+        const maxPosition = results[0].maxPosition || 0;
+        const newPosition = maxPosition + 1;
+
+        const insertQuery = 'INSERT INTO categories (name, position) VALUES (?, ?)';
+        connection.query(insertQuery, [name, newPosition], (err) => {
+            if (err) {
+                console.error('カテゴリの追加に失敗しました:', err);
+                res.status(500).json({ error: 'カテゴリの追加に失敗しました' });
+                return;
+            }
+            res.json({ message: '新しいカテゴリが追加されました' });
+        });
+    });
+});
+
+// カテゴリを削除するAPI
+app.post('/api/deleteCategory', (req, res) => {
+    const { id } = req.body;
+    const query = 'DELETE FROM categories WHERE id = ?';
+    connection.query(query, [id], (err) => {
+        if (err) {
+            console.error('カテゴリの削除に失敗しました:', err);
+            res.status(500).json({ error: 'カテゴリの削除に失敗しました' });
+            return;
+        }
+        res.json({ message: 'カテゴリが削除されました' });
+    });
+});
+
+
+
 app.listen(3000, () => {
     console.log('サーバーがポート3000で起動しました');
 });

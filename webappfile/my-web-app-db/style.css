@@ -294,6 +294,21 @@ body {
     background-color: #f4f4f4;
 }
 
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.category-item span {
+    flex-grow: 1;
+}
+
+.category-item button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
 .tabs {
     display: flex;
     gap: 10px;
