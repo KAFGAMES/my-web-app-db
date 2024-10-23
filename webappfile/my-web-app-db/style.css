@@ -326,3 +326,12 @@ body {
 .tabs button.active {
     background-color: #ddd;
 }
+
+.highlight-goal {
+    font-size: 18px;
+    font-weight: bold;
+    color: #d9534f; /* 赤色で強調 */
+    background-color: #f8d7da; /* 背景色を淡い赤色にする */
+    padding: 5px;
+    border-radius: 5px;
+}
