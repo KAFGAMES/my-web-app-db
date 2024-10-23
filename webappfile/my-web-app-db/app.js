@@ -403,6 +403,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (categories.length > 0) {
                 currentCategory = categories[0].name;
                 categorySelect.value = currentCategory;
+
+ 
+                // 初期表示の目標金額を設定
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth() + 1;
+                getGoalForCategory(currentCategory, year, month, (currentGoal) => {
+                    goalDisplay.textContent = `現在の目標金額: ${currentGoal}`;
+                    goalInput.value = currentGoal;
+                });
                 //loadDataForSelectedDate();
                 // 初期ロードの場合にのみカレンダーを描画
                 //if (initialLoad) {
@@ -668,7 +677,10 @@ function resetInputFields() {
         const month = currentDate.getMonth() + 1;
 
         if (currentCategory === 'total') {
-            const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+            // 現在のプルダウンのカテゴリを取得
+    const categories = Array.from(categorySelect.options)
+    .map(option => option.value)
+    .filter(value => value !== '' && value !== 'total'); // 無効なカテゴリと「合計」を除外
             let totalGoal = 0;
             let promises = categories.map(category => {
                 return new Promise((resolve) => {
@@ -1097,7 +1109,10 @@ function resetInputFields() {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth() + 1;
 
-        const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+        // 現在のプルダウンのカテゴリを取得
+    const categories = Array.from(categorySelect.options)
+    .map(option => option.value)
+    .filter(value => value !== '' && value !== 'total'); // 無効なカテゴリと「合計」を除外
         let totalGoal = 0;
         let totalBalance = 0;
 
