@@ -390,6 +390,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     categoryListDiv.appendChild(categoryDiv);
                 });
 
+                // 合計カテゴリを追加
+            const totalOption = document.createElement('option');
+            totalOption.value = 'total';
+            totalOption.text = '合計';
+            categorySelect.appendChild(totalOption);  // 一番下に追加
+
                 categorySelect.value = currentCategory;
                 updateCurrentCategory();
 
@@ -983,7 +989,12 @@ function resetInputFields() {
         let dateCount = 1;
         let rowCount = Math.ceil((firstDay + daysInMonth) / 7);
 
-        const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+        //const categories = ['web3', 'blog', 'part-time', 'food', 'social', 'taxes', 'business', 'leisure'];
+        // 現在のプルダウンのカテゴリを取得
+    const categories = Array.from(categorySelect.options)
+    .map(option => option.value)
+    .filter(value => value !== '' && value !== 'total'); // 無効なカテゴリと「合計」を除外
+
         let promises = [];
 
         for (let category of categories) {
