@@ -7,6 +7,7 @@ let goalChart = null;
 let currentCategory = ''; // デフォルトのカテゴリ
 let profitDetails = [];
 let expenseDetails = [];
+let categoriesList = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM要素の取得
@@ -107,8 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // カテゴリや日付が変更されたときの処理
     categorySelect.addEventListener('change', function() {
         currentCategory = this.value;
-
-        if (currentCategory === 'total') {
+        if (currentCategory === '') {
+            // カテゴリが選択されていない場合、入力を無効化
+            resetInputFields();
+        monthlyBalanceDiv.textContent = '月間損益: 0';
+        } else　if (currentCategory === 'total') {
             profitInput.disabled = true;
             expenseInput.disabled = true;
             saveButton.disabled = true;
@@ -322,11 +326,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 関数定義
 
     // カテゴリをロードする関数
-    function loadCategories() {
+    function loadCategories(initialLoad = false) {
         fetch('http://localhost:3000/api/getCategories')
             .then(response => response.json())
             .then(categories => {
-                categorySelect.innerHTML = '';
+                categorySelect.innerHTML = '<option value="" disabled>選択してください</option>'; // デフォルトの未選択オプション
 
                 const categoryListDiv = document.getElementById('category-list');
                 categoryListDiv.innerHTML = '';
@@ -388,7 +392,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 categorySelect.value = currentCategory;
                 updateCurrentCategory();
-            })
+
+                // 最初のカテゴリを自動選択
+            if (categories.length > 0) {
+                currentCategory = categories[0].name;
+                categorySelect.value = currentCategory;
+                //loadDataForSelectedDate();
+                // 初期ロードの場合にのみカレンダーを描画
+                //if (initialLoad) {
+                 //   renderCalendar(currentDate);
+               // }
+                // データをロードしてからカレンダーを描画
+                loadDataForMonth(currentCategory, currentDate, (dataForMonth) => {
+                    renderCalendar(currentDate, dataForMonth); // データを渡してカレンダーを描画
+                });
+            } else {
+                // カテゴリが存在しない場合、リセット
+                currentCategory = '';
+                resetInputFields();
+                renderCalendar(currentDate);
+            }
+        })
             .catch(error => {
                 console.error('カテゴリのロードに失敗しました:', error);
             });
@@ -404,11 +428,40 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(() => {
                 loadCategories();
-            })
+                 // 現在のカテゴリが削除された場合、プルダウンの一番上のカテゴリを選択
+        if (currentCategory === id) {
+            // カテゴリの一番上を選択する
+            const firstOption = categorySelect.options[1]; // インデックス1が最初の有効なカテゴリ
+            if (firstOption) {
+                currentCategory = firstOption.value;
+                categorySelect.value = currentCategory;
+                loadDataForSelectedDate(); // 新しいカテゴリに基づくデータをロード
+                renderCalendar(currentDate); // カレンダーを再描画
+            } else {
+                // カテゴリが存在しない場合、リセット
+                currentCategory = '';
+                categorySelect.value = '';
+                resetInputFields();
+                renderCalendar(currentDate); // カレンダーを再描画
+            }
+        }
+    })
             .catch(error => {
                 console.error('カテゴリの削除に失敗しました:', error);
             });
     }
+
+    // 入力フィールドのリセット関数
+function resetInputFields() {
+    profitInput.value = 0;
+    expenseInput.value = 0;
+    memoInput.value = '';
+    profitDetails = [];
+    expenseDetails = [];
+    updateProfitDetailsList();
+    updateExpenseDetailsList();
+    monthlyBalanceDiv.textContent = '月間損益: 0';
+}
 
     // カテゴリ名を更新する関数
     function updateCategoryName(id, newName) {
@@ -502,6 +555,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // カレンダーを描画する関数
     function renderCalendar(date) {
+
+        // カレンダーの内容をクリア
+        calendarBody.innerHTML = '';
+
         const year = date.getFullYear();
         const month = date.getMonth();
         const today = new Date();
